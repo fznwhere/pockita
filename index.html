@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pockita - Cutting Through Your Daily Expenses</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-brand">
+                <img src="pochita.png" alt="Pockita Mascot" class="app-logo">
+                <div class="brand-text">
+                    <h1>Pockita</h1>
+                    <p class="tagline">Cutting Through Your Daily Expenses</p>
+                </div>
+            </div>
+            
+            <div class="month-picker-container">
+                <input type="month" id="global-month-picker" class="borderless-picker" onchange="changeGlobalMonth()">
+            </div>
+        </header>
+
+        <div class="balance-card" onclick="toggleBreakdown()">
+            <span class="balance-title">TOTAL SALDO</span>
+            <h2 class="balance-amount">Rp <span id="total-saldo">0</span></h2>
+            <div id="balance-breakdown" class="balance-breakdown" style="display: none;"></div>
+        </div>
+
+        <nav class="main-nav">
+            <button class="nav-btn active" id="nav-tx" onclick="switchPage('tx')">Transaksi</button>
+            <button class="nav-btn" id="nav-analysis" onclick="switchPage('analysis')">Analisis</button>
+            <button class="nav-btn" id="nav-plan" onclick="switchPage('plan')">Rencana</button>
+        </nav>
+
+        <section id="page-tx" class="page-section">
+            <div class="tab-container">
+                <button class="tab-btn active" id="tab-pemasukan" onclick="switchForm('income')">+ Pemasukan</button>
+                <button class="tab-btn" id="tab-pengeluaran" onclick="switchForm('expense')">- Pengeluaran</button>
+            </div>
+
+            <div class="form-card" id="card-pemasukan">
+                <form id="form-pemasukan">
+                    <div class="input-group">
+                        <label>Jumlah Pemasukan</label>
+                        <input type="text" inputmode="numeric" id="in-jumlah" class="format-uang" placeholder="Contoh: 2.000.000" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Sumber Pemasukan</label>
+                        <input type="text" id="in-sumber" list="sumber-list" placeholder="Gaji, Ortu, Jualan..." required>
+                        <datalist id="sumber-list"></datalist>
+                    </div>
+                    <div class="input-group-row">
+                        <div class="input-group">
+                            <label>Tanggal</label>
+                            <input type="date" id="in-tanggal" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Jam</label>
+                            <input type="time" id="in-waktu" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>
+                            Metode Pembayaran
+                            <a href="#" onclick="openMethodModal(event)" class="btn-manage-method">⚙️ Kelola</a>
+                        </label>
+                        <select id="in-metode" required></select>
+                    </div>
+                    <button type="submit" id="btn-submit-income" class="btn btn-income">Simpan Pemasukan</button>
+                </form>
+            </div>
+
+            <div class="form-card" id="card-pengeluaran" style="display: none;">
+                <form id="form-pengeluaran">
+                    <div class="input-group">
+                        <label>Jumlah Pengeluaran</label>
+                        <input type="text" inputmode="numeric" id="out-jumlah" class="format-uang" placeholder="Contoh: 15.000" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Kategori Pengeluaran</label>
+                        <select id="out-kategori" required>
+                            <option value="kebutuhan">Kebutuhan</option>
+                            <option value="keinginan">Keinginan</option>
+                            <option value="tabungan">Tabungan</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Detail Item / Hal Apa</label>
+                        <input type="text" id="out-detail" list="detail-list" placeholder="Beli akun game, Beras..." required>
+                        <datalist id="detail-list"></datalist>
+                    </div>
+                    <div class="input-group-row">
+                        <div class="input-group">
+                            <label>Tanggal</label>
+                            <input type="date" id="out-tanggal" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Jam</label>
+                            <input type="time" id="out-waktu" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>
+                            Metode Pembayaran
+                            <a href="#" onclick="openMethodModal(event)" class="btn-manage-method">⚙️ Kelola</a>
+                        </label>
+                        <select id="out-metode" required></select>
+                    </div>
+                    <button type="submit" id="btn-submit-expense" class="btn btn-expense">Simpan Pengeluaran</button>
+                </form>
+            </div>
+
+            <div class="history-card">
+                <div class="history-header">
+                    <h3>Riwayat Transaksi</h3>
+                    <div class="history-actions">
+                        <button class="btn-export" onclick="exportToExcel()">📥 Excel</button>
+                        <select id="filter-metode" class="filter-dropdown" onchange="renderApp()">
+                            <option value="Semua">Semua Dompet</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="history-time-toggle">
+                    <div class="time-switches">
+                        <button id="btn-mode-bulan" class="time-btn active" onclick="setHistoryMode('bulan')">Lihat Bulanan</button>
+                        <button id="btn-mode-hari" class="time-btn" onclick="setHistoryMode('hari')">Lihat Harian</button>
+                    </div>
+                    <input type="date" id="filter-hari" style="display: none;" class="filter-dropdown" onchange="renderApp()">
+                </div>
+
+                <div id="daftar-transaksi" class="transaction-container"></div>
+            </div>
+        </section>
+
+        <section id="page-analysis" class="page-section" style="display: none;">
+            
+            <div class="status-budget-card">
+                <h3>Status Keuangan Bulan Ini</h3>
+                <p class="sub-info" style="text-align: center; margin-top: -10px; margin-bottom: 15px;">Tap kartu untuk melihat nominal maksimal</p>
+                
+                <div class="status-grid">
+                    
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front" id="bg-kebutuhan">
+                                <img src="" alt="Status" class="status-image" id="img-kebutuhan" style="display: none;">
+                                <div class="card-content-wrapper">
+                                    <span class="lbl-top">Kebutuhan</span>
+                                    <span class="badge-bottom" id="badge-kebutuhan">0%</span>
+                                </div>
+                            </div>
+                            <div class="flip-card-back">
+                                <span class="lbl-back">Batas Maks:</span>
+                                <span class="nominal-back" id="max-kebutuhan">0K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front" id="bg-keinginan">
+                                <img src="" alt="Status" class="status-image" id="img-keinginan" style="display: none;">
+                                <div class="card-content-wrapper">
+                                    <span class="lbl-top">Keinginan</span>
+                                    <span class="badge-bottom" id="badge-keinginan">0%</span>
+                                </div>
+                            </div>
+                            <div class="flip-card-back">
+                                <span class="lbl-back">Batas Maks:</span>
+                                <span class="nominal-back" id="max-keinginan">0K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front" id="bg-tabungan">
+                                <img src="" alt="Status" class="status-image" id="img-tabungan" style="display: none;">
+                                <div class="card-content-wrapper">
+                                    <span class="lbl-top">Tabungan</span>
+                                    <span class="badge-bottom" id="badge-tabungan">0%</span>
+                                </div>
+                            </div>
+                            <div class="flip-card-back">
+                                <span class="lbl-back">Batas Maks:</span>
+                                <span class="nominal-back" id="max-tabungan">0K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="charts-card">
+                <div class="chart-wrapper">
+                    <h4>Target Porsi Ideal 50/30/20</h4>
+                    <div id="empty-target-chart" class="chart-empty-state" style="display: none;">
+                        <img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Empty">
+                        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Belum ada Pemasukan Bulan Ini</span>
+                    </div>
+                    <canvas id="chartTarget"></canvas>
+                </div>
+                
+                <div class="chart-wrapper">
+                    <h4>Persentase Penggunaan Realisasi</h4>
+                    <p class="sub-info" style="margin-bottom: 8px;">Dari Total Pemasukan Bulan Ini</p>
+                    <div id="empty-realisasi-chart" class="chart-empty-state" style="display: none;">
+                        <img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Empty">
+                        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Belum ada Transaksi Bulan Ini</span>
+                    </div>
+                    <canvas id="chartRealisasi"></canvas>
+                </div>
+            </div>
+
+            <div class="history-card">
+                <h3>Perbandingan Arus Kas Antar Bulan</h3>
+                <div class="bar-chart-container" style="margin-top: 15px; height: 260px;">
+                    <canvas id="chartKomparasi"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-plan" class="page-section" style="display: none;">
+            
+            <div class="form-card">
+                <h3>Transaksi Bulanan</h3>
+                <p class="sub-info">Otomatis memotong saldo & tercatat setiap awal bulan.</p>
+                <form id="form-berulang" style="margin-top:15px;">
+                    <div class="input-group">
+                        <label>Nominal</label>
+                        <input type="text" inputmode="numeric" id="recur-jumlah" class="format-uang" placeholder="Contoh: 49.000" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Kategori</label>
+                        <select id="recur-kategori" required>
+                            <option value="kebutuhan">Kebutuhan</option>
+                            <option value="keinginan">Keinginan</option>
+                            <option value="tabungan">Tabungan</option>
+                        </select>
+                    </div>
+                    <div class="input-group-row">
+                        <div class="input-group">
+                            <label>Nama Pengeluaran / Layanan</label>
+                            <input type="text" id="recur-nama" placeholder="Spotify, Netflix..." required>
+                        </div>
+                        <div class="input-group">
+                            <label>Metode</label>
+                            <select id="recur-metode" required></select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-income" style="background-color: var(--primary-orange)">Aktifkan Langganan</button>
+                </form>
+                <div class="list-plan-container" style="margin-top:20px;">
+                    <h4>Daftar Rutinitas Aktif:</h4>
+                    <ul id="list-berulang" class="plan-list"></ul>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <h3>Target Menabung</h3>
+                <p class="sub-info">Bantu kamu konsisten menyisihkan uang buat impian.</p>
+                <form id="form-goals" style="margin-top:15px;">
+                    <div class="input-group">
+                        <label>Nama Barang / Impian</label>
+                        <input type="text" id="goal-nama" placeholder="Beli Laptop Gaming..." required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Kategori Tujuan Tabungan</label>
+                        <select id="goal-kategori" required>
+                            <option value="tabungan">Tabungan (Investasi)</option>
+                            <option value="keinginan">Keinginan (Beli Barang/Liburan)</option>
+                            <option value="kebutuhan">Kebutuhan (Dana Darurat)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group-row">
+                        <div class="input-group">
+                            <label>Target Uang Rp</label>
+                            <input type="text" inputmode="numeric" id="goal-target" class="format-uang" placeholder="Contoh: 10.000.000" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-income" style="background-color: var(--income-green)">Buat Target Baru</button>
+                </form>
+                <div class="list-plan-container" style="margin-top:20px;">
+                    <h4>Progress Tabungan Kamu:</h4>
+                    <div id="list-goals"></div>
+                </div>
+            </div>
+
+        </section>
+
+        <footer class="app-footer">
+            <img src="footer.png" alt="Footer Background" class="footer-bg">
+        </footer>
+
+    </div>
+
+    <div id="methodModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Katalog Metode Pembayaran</h3>
+                <span class="close-modal" onclick="closeMethodModal()">&times;</span>
+            </div>
+            <p class="sub-info" style="margin-bottom: 15px;">Tambahkan e-wallet atau bank baru beserta logonya.</p>
+            
+            <div class="input-group">
+                <label>Nama Metode (Misal: OVO, BSI)</label>
+                <input type="text" id="new-method-name" placeholder="Ketik nama metode...">
+            </div>
+            <div class="input-group">
+                <label>Upload Ikon / Logo (Opsional)</label>
+                <input type="file" id="new-method-file" accept="image/png, image/jpeg, image/jpg" style="padding: 10px;">
+                <p style="font-size: 0.7rem; color: #8492A6; margin-top: 4px;">*Gunakan file kecil rasio kotak 1:1.</p>
+            </div>
+            <button class="btn btn-income" onclick="saveNewMethod()" style="margin-bottom: 20px;">Tambah Metode</button>
+            
+            <h4 style="font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Daftar Metode Tersimpan</h4>
+            <ul id="modal-method-list" class="transaction-list" style="max-height: 150px; overflow-y: auto;">
+                </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
