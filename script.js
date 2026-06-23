@@ -4,7 +4,6 @@ let savingsGoals = JSON.parse(localStorage.getItem('pockita_goals')) || [];
 let recurringAppliedMonths = JSON.parse(localStorage.getItem('pockita_applied_months')) || [];
 let isBalanceHidden = JSON.parse(localStorage.getItem('pockita_hide_balance')) || false; 
 
-// DATA MIGRATION: PIUTANG LAMA KE STRUKTUR HUTANG/PIUTANG BARU
 let debtsData = JSON.parse(localStorage.getItem('pockita_debts')) || [];
 let oldPiutang = JSON.parse(localStorage.getItem('pockita_piutang'));
 if (oldPiutang && oldPiutang.length > 0) {
@@ -608,15 +607,16 @@ document.getElementById('form-piutang').addEventListener('submit', function(e){
     const name = document.getElementById('piutang-nama').value;
     const target = parseUang(document.getElementById('piutang-jumlah').value);
     const method = document.getElementById('piutang-metode').value; 
+    const category = document.getElementById('piutang-kategori').value; // Ambil opsi kebutuhan/keinginan
     const note = document.getElementById('piutang-catatan').value; 
 
     if (target <= 0) return;
     const debtId = Date.now();
-    debtsData.push({ id: debtId, type: 'piutang', name, target, note, method });
+    debtsData.push({ id: debtId, type: 'piutang', name, target, note, method, category });
     localStorage.setItem('pockita_debts', JSON.stringify(debtsData));
 
     const now = new Date();
-    transactions.push({ id: Date.now() + 1, type: 'expense', amount: target, category: 'umum', desc: `Memberi Piutang: ${name}`, date: now.toISOString().split('T')[0], time: now.toTimeString().split(' ')[0].slice(0,5), method: method, debtId: debtId });
+    transactions.push({ id: Date.now() + 1, type: 'expense', amount: target, category: category, desc: `Memberi Piutang: ${name}`, date: now.toISOString().split('T')[0], time: now.toTimeString().split(' ')[0].slice(0,5), method: method, debtId: debtId });
     localStorage.setItem('pockita_tx', JSON.stringify(transactions));
     this.reset(); renderApp();
 });
@@ -653,7 +653,7 @@ function tambahTabunganGoal(id) {
 
     if (moneyToAdd > remaining) {
         moneyToAdd = remaining;
-        alert(`Nominal dilebihkan. Otomatis disesuaikan dengan sisa tagihan/target (Rp ${formatRupiah(remaining)}).`);
+        alert(`Nominal dilebihkan. Otomatis disesuaikan dengan sisa nominal (Rp ${formatRupiah(remaining)}).`);
     }
 
     const now = new Date();
@@ -672,7 +672,6 @@ function bayarDebt(id) {
     const debt = debtsData.find(d => d.id === id);
     let collectedAmount = 0;
     
-    // Jika Piutang, kita nerima uang (income). Jika Hutang, kita bayar (expense).
     if (debt.type === 'piutang') {
         collectedAmount = transactions.filter(tx => tx.debtId === debt.id && tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0);
     } else {
@@ -768,36 +767,6 @@ function renderPlans() {
     let piutangList = debtsData.filter(d => d.type === 'piutang');
     let hutangList = debtsData.filter(d => d.type === 'hutang');
 
-    if(piutangList.length === 0){
-        containerPiutang.innerHTML = `<div class="empty-state" style="padding: 10px 0;"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" style="width:40px;height:40px;" alt="Kosong">Belum ada daftar piutang.</div>`;
-    } else {
-        piutangList.forEach(p => {
-            let collectedAmount = transactions.filter(tx => tx.debtId === p.id && tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0);
-            const pct = Math.min(Math.round((collectedAmount / p.target) * 100), 100);
-            let specificSelect = selectHtml.replace('<select class=', `<select id="method-bayar-debt-${p.id}" class=`);
-
-            let isCompleted = collectedAmount >= p.target;
-            let actionHTML = isCompleted ? 
-                `<span style="color: var(--income-green); font-weight: 800; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">✓ LUNAS</span><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${p.id})">${iconDelete}</button>` : 
-                `<input type="text" id="input-bayar-debt-${p.id}" class="format-uang" placeholder="+ Lunas/Nyicil">${specificSelect}<button class="btn-add-goal" style="background-color: #3B82F6;" onclick="bayarDebt(${p.id})">Terima</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${p.id})">${iconDelete}</button>`;
-
-            let noteUI = p.note ? `<div class="piutang-note">📝 Catatan: ${p.note}</div>` : '';
-
-            containerPiutang.innerHTML += `
-                <div class="goal-box">
-                    <div class="goal-info">
-                        <span><b>${p.name}</b> <br><small style="color:var(--text-muted); font-weight:normal;">Dipinjam dari ${p.method}</small></span>
-                        <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(p.target)}</small></span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: ${pct}%; background-color: ${isCompleted ? 'var(--income-green)' : '#3B82F6'};"></div>
-                    </div>
-                    ${noteUI}
-                    <div class="goal-actions" style="margin-top: 5px;">${actionHTML}</div>
-                </div>`;
-        });
-    }
-
     if(hutangList.length === 0){
         containerHutang.innerHTML = `<div class="empty-state" style="padding: 10px 0;"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" style="width:40px;height:40px;" alt="Kosong">Belum ada daftar hutang.</div>`;
     } else {
@@ -809,18 +778,48 @@ function renderPlans() {
             let isCompleted = collectedAmount >= h.target;
             let actionHTML = isCompleted ? 
                 `<span style="color: var(--income-green); font-weight: 800; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">✓ LUNAS</span><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${h.id})">${iconDelete}</button>` : 
-                `<input type="text" id="input-bayar-debt-${h.id}" class="format-uang" placeholder="+ Lunas/Nyicil">${specificSelect}<button class="btn-add-goal" style="background-color: #8B5CF6;" onclick="bayarDebt(${h.id})">Bayar</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${h.id})">${iconDelete}</button>`;
+                `<input type="text" id="input-bayar-debt-${h.id}" class="format-uang" placeholder="+ Lunas/Nyicil">${specificSelect}<button class="btn-add-goal" onclick="bayarDebt(${h.id})">Bayar</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${h.id})">${iconDelete}</button>`;
 
             let noteUI = h.note ? `<div class="piutang-note">📝 Catatan: ${h.note}</div>` : '';
 
             containerHutang.innerHTML += `
                 <div class="goal-box">
                     <div class="goal-info">
-                        <span><b>${h.name}</b> <br><small style="color:var(--text-muted); font-weight:normal;">Disimpan ke ${h.method}</small></span>
+                        <span><b>${h.name}</b> <br><small style="color:var(--text-muted); font-weight:normal;">| Disimpan ke ${h.method}</small></span>
                         <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(h.target)}</small></span>
                     </div>
                     <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: ${pct}%; background-color: ${isCompleted ? 'var(--income-green)' : '#8B5CF6'};"></div>
+                        <div class="progress-bar-fill" style="width: ${pct}%; background-color: ${isCompleted ? 'var(--income-green)' : 'var(--primary-orange)'};"></div>
+                    </div>
+                    ${noteUI}
+                    <div class="goal-actions" style="margin-top: 5px;">${actionHTML}</div>
+                </div>`;
+        });
+    }
+
+    if(piutangList.length === 0){
+        containerPiutang.innerHTML = `<div class="empty-state" style="padding: 10px 0;"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" style="width:40px;height:40px;" alt="Kosong">Belum ada daftar piutang.</div>`;
+    } else {
+        piutangList.forEach(p => {
+            let collectedAmount = transactions.filter(tx => tx.debtId === p.id && tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0);
+            const pct = Math.min(Math.round((collectedAmount / p.target) * 100), 100);
+            let specificSelect = selectHtml.replace('<select class=', `<select id="method-bayar-debt-${p.id}" class=`);
+
+            let isCompleted = collectedAmount >= p.target;
+            let actionHTML = isCompleted ? 
+                `<span style="color: var(--income-green); font-weight: 800; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">✓ LUNAS</span><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${p.id})">${iconDelete}</button>` : 
+                `<input type="text" id="input-bayar-debt-${p.id}" class="format-uang" placeholder="+ Lunas/Nyicil">${specificSelect}<button class="btn-add-goal" onclick="bayarDebt(${p.id})">Terima</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${p.id})">${iconDelete}</button>`;
+
+            let noteUI = p.note ? `<div class="piutang-note">📝 Catatan: ${p.note}</div>` : '';
+
+            containerPiutang.innerHTML += `
+                <div class="goal-box">
+                    <div class="goal-info">
+                        <span><b>${p.name}</b> <br><small style="color:var(--text-muted); font-weight:normal;">| ${p.category.toUpperCase()} | Dipinjam dari ${p.method}</small></span>
+                        <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(p.target)}</small></span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${pct}%; background-color: ${isCompleted ? 'var(--income-green)' : 'var(--primary-orange)'};"></div>
                     </div>
                     ${noteUI}
                     <div class="goal-actions" style="margin-top: 5px;">${actionHTML}</div>
