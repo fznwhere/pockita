@@ -127,14 +127,18 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .pill-container { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;}
 .pill { font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; color: white; letter-spacing: 0.5px;}
 
-/* Penyelarasan warna Tag (Pil) mengikuti Tema Aplikasi */
+/* CSS UNTUK PIL OUTLINE (MODERN) DI HALAMAN RENCANA */
+.pill-outline { font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; letter-spacing: 0.5px; border: 1.5px solid; background-color: transparent;}
+.pill-outline-kebutuhan { border-color: var(--income-green); color: var(--income-green); }
+.pill-outline-keinginan { border-color: var(--secondary-orange); color: var(--secondary-orange); }
+.pill-outline-tabungan { border-color: var(--expense-red); color: var(--expense-red); }
+.pill-outline-method { border-color: #3498DB; color: #3498DB; } 
+
 .pill-kebutuhan { background-color: var(--income-green); }
 .pill-keinginan { background-color: var(--secondary-orange); }
 .pill-tabungan { background-color: var(--expense-red); }
 .pill-auto { background-color: #E84393; } 
 .pill-target { background-color: #2980B9; } 
-.pill-piutang { background-color: var(--income-green); } 
-.pill-hutang { background-color: var(--expense-red); } 
 
 .tx-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
 .tx-kanan { text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;}
