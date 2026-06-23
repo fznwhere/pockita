@@ -5,12 +5,6 @@ let recurringAppliedMonths = JSON.parse(localStorage.getItem('pockita_applied_mo
 let isBalanceHidden = JSON.parse(localStorage.getItem('pockita_hide_balance')) || false; 
 
 let debtsData = JSON.parse(localStorage.getItem('pockita_debts')) || [];
-let oldPiutang = JSON.parse(localStorage.getItem('pockita_piutang'));
-if (oldPiutang && oldPiutang.length > 0) {
-    oldPiutang.forEach(p => { debtsData.push({...p, type: 'piutang'}); });
-    localStorage.removeItem('pockita_piutang');
-    localStorage.setItem('pockita_debts', JSON.stringify(debtsData));
-}
 
 let pockitaMethods = JSON.parse(localStorage.getItem('pockita_custom_methods')) || {
     'Cash': '', 'BCA': '', 'DANA': '', 'GoPay': ''
@@ -320,19 +314,14 @@ function renderApp() {
                     let isTerimaHutang = tx.desc.startsWith('Menerima Hutang: ');
                     let isBayarHutang = tx.desc.startsWith('Bayar Hutang: ');
                     
-                    let isPiutang = isBeriPiutang || isTerimaPiutang;
-                    let isHutang = isTerimaHutang || isBayarHutang;
-
                     let cleanDesc = tx.desc.replace('Auto: ', '').replace('Target: ', '').replace('Memberi Piutang: ', '').replace('Terima Piutang: ', '').replace('Menerima Hutang: ', '').replace('Bayar Hutang: ', '');
                     
                     let pillExtra = '';
                     if (isAuto) pillExtra = `<span class="pill pill-auto">Auto</span>`;
                     if (isTarget) pillExtra = `<span class="pill pill-target">Tagihan</span>`;
-                    if (isPiutang) pillExtra = `<span class="pill pill-piutang">Piutang</span>`;
-                    if (isHutang) pillExtra = `<span class="pill pill-hutang">Hutang</span>`;
 
                     let catName = (tx.category && typeof tx.category === 'string') ? tx.category.toLowerCase() : "umum";
-                    let pillKategori = tx.type === 'expense' && !isPiutang && !isHutang ? `<span class="pill pill-${catName}">${catName.toUpperCase()}</span>` : '';
+                    let pillKategori = tx.type === 'expense' ? `<span class="pill pill-${catName}">${catName.toUpperCase()}</span>` : '';
                     
                     const li = document.createElement('li');
                     li.className = 'transaction-item';
@@ -601,13 +590,12 @@ document.getElementById('form-goals').addEventListener('submit', function(e){
     this.reset(); renderApp();
 });
 
-// LOGIKA FORM PIUTANG (Uang Keluar)
 document.getElementById('form-piutang').addEventListener('submit', function(e){
     e.preventDefault();
     const name = document.getElementById('piutang-nama').value;
     const target = parseUang(document.getElementById('piutang-jumlah').value);
     const method = document.getElementById('piutang-metode').value; 
-    const category = document.getElementById('piutang-kategori').value; // Ambil opsi kebutuhan/keinginan
+    const category = document.getElementById('piutang-kategori').value; 
     const note = document.getElementById('piutang-catatan').value; 
 
     if (target <= 0) return;
@@ -621,7 +609,6 @@ document.getElementById('form-piutang').addEventListener('submit', function(e){
     this.reset(); renderApp();
 });
 
-// LOGIKA FORM HUTANG (Uang Masuk)
 document.getElementById('form-hutang').addEventListener('submit', function(e){
     e.preventDefault();
     const name = document.getElementById('hutang-nama').value;
@@ -653,7 +640,7 @@ function tambahTabunganGoal(id) {
 
     if (moneyToAdd > remaining) {
         moneyToAdd = remaining;
-        alert(`Nominal dilebihkan. Otomatis disesuaikan dengan sisa nominal (Rp ${formatRupiah(remaining)}).`);
+        alert(`Nominal dilebihkan. Otomatis disesuaikan dengan sisa tagihan/target (Rp ${formatRupiah(remaining)}).`);
     }
 
     const now = new Date();
@@ -721,9 +708,17 @@ function renderPlans() {
         listRecur.innerHTML = `<div class="empty-state"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Kosong">Belum ada langganan rutin.</div>`;
     } else {
         recurringTemplates.forEach(t => {
+            let catName = t.category.toLowerCase();
+            let catColorClass = catName === 'kebutuhan' ? 'pill-outline-kebutuhan' : 'pill-outline-keinginan';
+            
             listRecur.innerHTML += `
                 <li class="plan-item">
-                    <span><b>${t.name}</b> Rp ${formatRupiah(t.amount)}<br><small style="color:var(--text-muted);">${t.category.toUpperCase()} | ${t.method}</small></span>
+                    <span><b>${t.name}</b> Rp ${formatRupiah(t.amount)}<br>
+                        <div class="pill-container" style="margin-top: 4px;">
+                            <span class="pill-outline ${catColorClass}">${t.category.toUpperCase()}</span>
+                            <span class="pill-outline pill-outline-method">${t.method}</span>
+                        </div>
+                    </span>
                     <button class="btn-delete" style="margin:0; height:fit-content;" onclick="hapusPlan('recur', ${t.id})">${iconDelete}</button>
                 </li>`;
         });
@@ -742,13 +737,20 @@ function renderPlans() {
 
             let isCompleted = collectedAmount >= g.target;
             let actionHTML = isCompleted ? 
-                `<span style="color: var(--income-green); font-weight: 800; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">✓ LUNAS / TERCAPAI</span><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('goal', ${g.id})">${iconDelete}</button>` : 
+                `<span style="color: var(--income-green); font-weight: 800; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">✓ TERCAPAI</span><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('goal', ${g.id})">${iconDelete}</button>` : 
                 `<input type="text" id="input-add-goal-${g.id}" class="format-uang" placeholder="+ Nominal">${specificSelect}<button class="btn-add-goal" onclick="tambahTabunganGoal(${g.id})">Setor</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('goal', ${g.id})">${iconDelete}</button>`;
+
+            let catName = g.category.toLowerCase();
+            let catColorClass = catName === 'kebutuhan' ? 'pill-outline-kebutuhan' : 'pill-outline-keinginan';
 
             containerGoals.innerHTML += `
                 <div class="goal-box">
                     <div class="goal-info">
-                        <span><b>${g.name}</b> <br><small style="color:var(--text-muted); font-weight:normal;">| ${g.category.toUpperCase()}</small></span>
+                        <span><b>${g.name}</b> <br>
+                            <div class="pill-container" style="margin-top: 4px;">
+                                <span class="pill-outline ${catColorClass}">${g.category.toUpperCase()}</span>
+                            </div>
+                        </span>
                         <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(g.target)}</small></span>
                     </div>
                     <div class="progress-bar-bg">
@@ -780,12 +782,16 @@ function renderPlans() {
                 `<span style="color: var(--income-green); font-weight: 800; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">✓ LUNAS</span><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${h.id})">${iconDelete}</button>` : 
                 `<input type="text" id="input-bayar-debt-${h.id}" class="format-uang" placeholder="+ Lunas/Nyicil">${specificSelect}<button class="btn-add-goal" onclick="bayarDebt(${h.id})">Bayar</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${h.id})">${iconDelete}</button>`;
 
-            let noteUI = h.note ? `<div class="piutang-note">📝 Catatan: ${h.note}</div>` : '';
+            let noteUI = h.note ? `<div class="piutang-note">Catatan: ${h.note}</div>` : '';
 
             containerHutang.innerHTML += `
                 <div class="goal-box">
                     <div class="goal-info">
-                        <span><b>${h.name}</b> <br><small style="color:var(--text-muted); font-weight:normal;">| Disimpan ke ${h.method}</small></span>
+                        <span><b>${h.name}</b> <br>
+                            <div class="pill-container" style="margin-top: 4px;">
+                                <span class="pill-outline pill-outline-method">Disimpan ke ${h.method}</span>
+                            </div>
+                        </span>
                         <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(h.target)}</small></span>
                     </div>
                     <div class="progress-bar-bg">
@@ -810,12 +816,19 @@ function renderPlans() {
                 `<span style="color: var(--income-green); font-weight: 800; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">✓ LUNAS</span><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${p.id})">${iconDelete}</button>` : 
                 `<input type="text" id="input-bayar-debt-${p.id}" class="format-uang" placeholder="+ Lunas/Nyicil">${specificSelect}<button class="btn-add-goal" onclick="bayarDebt(${p.id})">Terima</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${p.id})">${iconDelete}</button>`;
 
-            let noteUI = p.note ? `<div class="piutang-note">📝 Catatan: ${p.note}</div>` : '';
+            let noteUI = p.note ? `<div class="piutang-note">Catatan: ${p.note}</div>` : '';
+            let catName = p.category ? p.category.toLowerCase() : 'umum';
+            let catColorClass = catName === 'kebutuhan' ? 'pill-outline-kebutuhan' : 'pill-outline-keinginan';
 
             containerPiutang.innerHTML += `
                 <div class="goal-box">
                     <div class="goal-info">
-                        <span><b>${p.name}</b> <br><small style="color:var(--text-muted); font-weight:normal;">| ${p.category.toUpperCase()} | Dipinjam dari ${p.method}</small></span>
+                        <span><b>${p.name}</b> <br>
+                            <div class="pill-container" style="margin-top: 4px;">
+                                <span class="pill-outline ${catColorClass}">${p.category.toUpperCase()}</span>
+                                <span class="pill-outline pill-outline-method">Diambil dari ${p.method}</span>
+                            </div>
+                        </span>
                         <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(p.target)}</small></span>
                     </div>
                     <div class="progress-bar-bg">
@@ -827,6 +840,13 @@ function renderPlans() {
         });
     }
 
+    // Terapkan format otomatis pada semua input dinamis
+    document.querySelectorAll('.goal-actions .format-uang').forEach(input => {
+        // Hilangkan event listener lama agar tidak dobel
+        input.replaceWith(input.cloneNode(true));
+    });
+    
+    // Pasang event listener baru
     document.querySelectorAll('.goal-actions .format-uang').forEach(input => {
         input.addEventListener('input', function(e) {
             let val = e.target.value.replace(/[^0-9]/g, '');
