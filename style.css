@@ -127,13 +127,14 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .pill-container { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;}
 .pill { font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; color: white; letter-spacing: 0.5px;}
 
+/* Penyelarasan warna Tag (Pil) mengikuti Tema Aplikasi */
 .pill-kebutuhan { background-color: var(--income-green); }
 .pill-keinginan { background-color: var(--secondary-orange); }
 .pill-tabungan { background-color: var(--expense-red); }
 .pill-auto { background-color: #E84393; } 
 .pill-target { background-color: #2980B9; } 
-.pill-piutang { background-color: #3B82F6; } /* Biru Piutang */
-.pill-hutang { background-color: #8B5CF6; } /* Ungu Hutang */
+.pill-piutang { background-color: var(--income-green); } 
+.pill-hutang { background-color: var(--expense-red); } 
 
 .tx-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
 .tx-kanan { text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;}
@@ -174,6 +175,6 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .close-modal { color: var(--text-muted); font-size: 28px; font-weight: bold; cursor: pointer; }
 .close-modal:hover { color: var(--expense-red); }
 
-/* Footer Ilustrasi */
+/* Footer Ilustrasi Mentok Bawah & Samping */
 .app-footer { position: relative; margin-top: 15px; margin-left: -10px; margin-right: -10px; border-radius: 0; overflow: hidden; display: flex; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 40%); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 40%); }
 .footer-bg { width: 100%; height: auto; display: block; }
