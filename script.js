@@ -5,9 +5,24 @@ let debtsData = JSON.parse(localStorage.getItem('pockita_debts')) || [];
 let recurringAppliedMonths = JSON.parse(localStorage.getItem('pockita_applied_months')) || [];
 let isBalanceHidden = JSON.parse(localStorage.getItem('pockita_hide_balance')) || false; 
 
+// MIGRASI DATA LAMA (Mencegah Crash)
+let oldPiutang = JSON.parse(localStorage.getItem('pockita_piutang'));
+if (oldPiutang && oldPiutang.length > 0) {
+    oldPiutang.forEach(p => { debtsData.push({...p, type: 'piutang'}); });
+    localStorage.removeItem('pockita_piutang');
+    localStorage.setItem('pockita_debts', JSON.stringify(debtsData));
+}
+
 let pockitaMethods = JSON.parse(localStorage.getItem('pockita_custom_methods')) || {
     'Cash': '', 'BCA': '', 'DANA': '', 'GoPay': ''
 };
+
+let legacyMethods = JSON.parse(localStorage.getItem('pockita_methods'));
+if (Array.isArray(legacyMethods)) {
+    legacyMethods.forEach(m => { if(!pockitaMethods[m]) pockitaMethods[m] = ''; });
+    localStorage.removeItem('pockita_methods');
+    localStorage.setItem('pockita_custom_methods', JSON.stringify(pockitaMethods));
+}
 
 let savedSources = new Set(JSON.parse(localStorage.getItem('pockita_sources')) || []);
 let savedDetails = new Set(JSON.parse(localStorage.getItem('pockita_details')) || []);
@@ -259,8 +274,8 @@ function renderApp() {
                 ul.className = 'transaction-list';
 
                 txsByDate[dateStr].sort((a, b) => {
-                    const timeA = new Date(a.date + 'T' + a.time).getTime();
-                    const timeB = new Date(b.date + 'T' + b.time).getTime();
+                    const timeA = new Date((a.date||'') + 'T' + (a.time||'00:00')).getTime() || a.id;
+                    const timeB = new Date((b.date||'') + 'T' + (b.time||'00:00')).getTime() || b.id;
                     if (timeA === timeB) return b.id - a.id; 
                     return timeB - timeA;
                 }).forEach(tx => {
@@ -603,7 +618,7 @@ function tambahTabunganGoal(id) {
 
     if (moneyToAdd > remaining) {
         moneyToAdd = remaining;
-        alert(`Nominal dilebihkan. Otomatis disesuaikan dengan sisa tagihan/target (Rp ${formatRupiah(remaining)}).`);
+        alert(`Nominal dilebihkan. Otomatis disesuaikan dengan sisa nominal (Rp ${formatRupiah(remaining)}).`);
     }
 
     const now = new Date();
@@ -671,15 +686,15 @@ function renderPlans() {
         listRecur.innerHTML = `<div class="empty-state"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Kosong">Belum ada langganan rutin.</div>`;
     } else {
         recurringTemplates.forEach(t => {
-            let catName = t.category.toLowerCase();
-            let catColorClass = catName === 'kebutuhan' ? 'pill-outline-kebutuhan' : 'pill-outline-keinginan';
+            let safeCat = t.category ? t.category.toLowerCase() : 'umum';
+            let catColorClass = safeCat === 'kebutuhan' ? 'pill-outline-kebutuhan' : 'pill-outline-keinginan';
             
             listRecur.innerHTML += `
                 <li class="plan-item">
                     <span><b>${t.name}</b> Rp ${formatRupiah(t.amount)}<br>
                         <div class="pill-container" style="margin-top: 4px;">
-                            <span class="pill-outline ${catColorClass}">${t.category.toUpperCase()}</span>
-                            <span class="pill-outline pill-outline-method">${t.method}</span>
+                            <span class="pill-outline ${catColorClass}">${safeCat.toUpperCase()}</span>
+                            <span class="pill-outline pill-outline-method">${t.method || 'Cash'}</span>
                         </div>
                     </span>
                     <button class="btn-delete" style="margin:0; height:fit-content;" onclick="hapusPlan('recur', ${t.id})">${iconDelete}</button>
@@ -703,15 +718,15 @@ function renderPlans() {
                 `<span style="color: var(--income-green); font-weight: 800; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">✓ TERCAPAI</span><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('goal', ${g.id})">${iconDelete}</button>` : 
                 `<input type="text" id="input-add-goal-${g.id}" class="format-uang" placeholder="+ Nominal">${specificSelect}<button class="btn-add-goal" onclick="tambahTabunganGoal(${g.id})">Setor</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('goal', ${g.id})">${iconDelete}</button>`;
 
-            let catName = g.category.toLowerCase();
-            let catColorClass = catName === 'kebutuhan' ? 'pill-outline-kebutuhan' : 'pill-outline-keinginan';
+            let safeCat = g.category ? g.category.toLowerCase() : 'tabungan';
+            let catColorClass = safeCat === 'kebutuhan' ? 'pill-outline-kebutuhan' : (safeCat === 'keinginan' ? 'pill-outline-keinginan' : 'pill-outline-tabungan');
 
             containerGoals.innerHTML += `
                 <div class="goal-box">
                     <div class="goal-info">
                         <span><b>${g.name}</b> <br>
                             <div class="pill-container" style="margin-top: 4px;">
-                                <span class="pill-outline ${catColorClass}">${g.category.toUpperCase()}</span>
+                                <span class="pill-outline ${catColorClass}">${safeCat.toUpperCase()}</span>
                             </div>
                         </span>
                         <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(g.target)}</small></span>
@@ -743,7 +758,7 @@ function renderPlans() {
             let isCompleted = collectedAmount >= h.target;
             let actionHTML = isCompleted ? 
                 `<span style="color: var(--text-main); font-weight: 800; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">✓ LUNAS</span><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${h.id})">${iconDelete}</button>` : 
-                `<input type="text" id="input-bayar-debt-${h.id}" class="format-uang" placeholder="+ Lunas/Nyicil">${specificSelect}<button class="btn-add-goal" onclick="bayarDebt(${h.id})">Bayar</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${h.id})">${iconDelete}</button>`;
+                `<input type="text" id="input-bayar-debt-${h.id}" class="format-uang" placeholder="+ Nominal">${specificSelect}<button class="btn-add-goal" onclick="bayarDebt(${h.id})">Bayar</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${h.id})">${iconDelete}</button>`;
 
             let noteUI = h.note ? `<div class="piutang-note">Catatan: ${h.note}</div>` : '';
 
@@ -752,7 +767,7 @@ function renderPlans() {
                     <div class="goal-info">
                         <span><b>${h.name}</b> <br>
                             <div class="pill-container" style="margin-top: 4px;">
-                                <span class="pill-outline pill-outline-method">${h.method}</span>
+                                <span class="pill-outline pill-outline-method">${h.method || 'Cash'}</span>
                             </div>
                         </span>
                         <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(h.target)}</small></span>
@@ -777,19 +792,19 @@ function renderPlans() {
             let isCompleted = collectedAmount >= p.target;
             let actionHTML = isCompleted ? 
                 `<span style="color: var(--text-main); font-weight: 800; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">✓ LUNAS</span><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${p.id})">${iconDelete}</button>` : 
-                `<input type="text" id="input-bayar-debt-${p.id}" class="format-uang" placeholder="+ Lunas/Nyicil">${specificSelect}<button class="btn-add-goal" onclick="bayarDebt(${p.id})">Terima</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${p.id})">${iconDelete}</button>`;
+                `<input type="text" id="input-bayar-debt-${p.id}" class="format-uang" placeholder="+ Nominal">${specificSelect}<button class="btn-add-goal" onclick="bayarDebt(${p.id})">Terima</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${p.id})">${iconDelete}</button>`;
 
             let noteUI = p.note ? `<div class="piutang-note">Catatan: ${p.note}</div>` : '';
-            let catName = p.category ? p.category.toLowerCase() : 'umum';
-            let catColorClass = catName === 'kebutuhan' ? 'pill-outline-kebutuhan' : 'pill-outline-keinginan';
+            let safeCat = p.category ? p.category.toLowerCase() : 'umum';
+            let catColorClass = safeCat === 'kebutuhan' ? 'pill-outline-kebutuhan' : 'pill-outline-keinginan';
 
             containerPiutang.innerHTML += `
                 <div class="goal-box">
                     <div class="goal-info">
                         <span><b>${p.name}</b> <br>
                             <div class="pill-container" style="margin-top: 4px;">
-                                <span class="pill-outline ${catColorClass}">${p.category.toUpperCase()}</span>
-                                <span class="pill-outline pill-outline-method">${p.method}</span>
+                                <span class="pill-outline ${catColorClass}">${safeCat.toUpperCase()}</span>
+                                <span class="pill-outline pill-outline-method">${p.method || 'Cash'}</span>
                             </div>
                         </span>
                         <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(p.target)}</small></span>
@@ -804,6 +819,11 @@ function renderPlans() {
     }
 
     // Format Uang Dinamis untuk progress inputs
+    document.querySelectorAll('.goal-actions .format-uang').forEach(input => {
+        // Hapus duplikasi event listener
+        input.replaceWith(input.cloneNode(true));
+    });
+    
     document.querySelectorAll('.goal-actions .format-uang').forEach(input => {
         input.addEventListener('input', function(e) {
             let val = e.target.value.replace(/[^0-9]/g, '');
@@ -840,8 +860,8 @@ function exportToExcel() {
     
     let csvContent = "data:text/csv;charset=utf-8,\uFEFFTanggal,Jam,Tipe,Kategori,Detail,Metode,Jumlah (Rp)\n";
     displayTx.sort((a,b) => {
-        const timeA = new Date(a.date + 'T' + a.time).getTime();
-        const timeB = new Date(b.date + 'T' + b.time).getTime();
+        const timeA = new Date((a.date||'') + 'T' + (a.time||'00:00')).getTime() || a.id;
+        const timeB = new Date((b.date||'') + 'T' + (b.time||'00:00')).getTime() || b.id;
         if (timeA === timeB) return b.id - a.id; 
         return timeB - timeA;
     }).forEach(tx => {
