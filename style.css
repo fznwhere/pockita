@@ -130,9 +130,10 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .pill-kebutuhan { background-color: var(--income-green); }
 .pill-keinginan { background-color: var(--secondary-orange); }
 .pill-tabungan { background-color: var(--expense-red); }
-.pill-auto { background-color: #8E44AD; } 
+.pill-auto { background-color: #E84393; } 
 .pill-target { background-color: #2980B9; } 
-.pill-piutang { background-color: #10B981; } /* Hijau beda untuk hutang/piutang */
+.pill-piutang { background-color: #3B82F6; } /* Biru Piutang */
+.pill-hutang { background-color: #8B5CF6; } /* Ungu Hutang */
 
 .tx-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
 .tx-kanan { text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;}
@@ -154,9 +155,6 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .plan-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--bg-app); font-size: 0.9rem; align-items: center;}
 .goal-box { background-color: var(--bg-app); border: 1px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 15px; position: relative;}
 
-/* Pochita Tidur HANYA MUNCUL DI LUAR KOTAK GOAL */
-.empty-goal-img { display: none; }
-
 .goal-info { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; z-index: 2; position: relative;}
 .progress-bar-bg { background-color: #EAECEF; height: 12px; border-radius: 20px; width: 100%; overflow: hidden; position: relative; margin-bottom: 12px; z-index: 2;}
 .progress-bar-fill { background-color: var(--primary-orange); height: 100%; width: 0%; transition: width 0.3s; }
@@ -165,7 +163,6 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .goal-actions select { padding: 8px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--white); font-weight:600;}
 .btn-add-goal { background-color: var(--primary-orange); border: none; color: white; padding: 6px 12px; font-size: 0.8rem; border-radius: 10px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(232, 93, 4, 0.2);}
 
-/* Kotak Catatan Piutang */
 .piutang-note { font-size: 0.8rem; color: var(--text-muted); background: #FFF2EC; padding: 8px 12px; border-radius: 10px; margin-bottom: 10px; display: inline-block;}
 
 /* Modal */
@@ -177,8 +174,6 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .close-modal { color: var(--text-muted); font-size: 28px; font-weight: bold; cursor: pointer; }
 .close-modal:hover { color: var(--expense-red); }
 
-/* =========================================
-   Footer Ilustrasi Mentok Bawah & Samping
-   ========================================= */
+/* Footer Ilustrasi */
 .app-footer { position: relative; margin-top: 15px; margin-left: -10px; margin-right: -10px; border-radius: 0; overflow: hidden; display: flex; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 40%); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 40%); }
 .footer-bg { width: 100%; height: auto; display: block; }
