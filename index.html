@@ -251,10 +251,10 @@
                     </div>
                     <div class="input-group">
                         <label>Kategori</label>
+                        <!-- Opsi Tabungan dihapus agar tidak tersentuh -->
                         <select id="recur-kategori" required>
                             <option value="kebutuhan">Kebutuhan</option>
                             <option value="keinginan">Keinginan</option>
-                            <option value="tabungan">Tabungan</option>
                         </select>
                     </div>
                     <div class="input-group-row">
@@ -286,10 +286,10 @@
                     </div>
                     <div class="input-group">
                         <label>Potong dari Alokasi Dana</label>
+                        <!-- Opsi Tabungan dihapus agar tidak tersentuh -->
                         <select id="goal-kategori" required>
-                            <option value="tabungan">Tabungan</option>
-                            <option value="keinginan">Keinginan</option>
                             <option value="kebutuhan">Kebutuhan</option>
+                            <option value="keinginan">Keinginan</option>
                         </select>
                     </div>
                     <div class="input-group-row">
@@ -298,7 +298,7 @@
                             <input type="text" inputmode="numeric" id="goal-target" class="format-uang" placeholder="Contoh: 10.000.000" required>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-income" style="background-color: var(--income-green)">Buat Daftar Baru</button>
+                    <button type="submit" class="btn btn-income" style="background-color: var(--primary-orange)">Buat Daftar Baru</button>
                 </form>
                 <div class="list-plan-container" style="margin-top:20px;">
                     <h4>Progress Target & Tagihan:</h4>
@@ -312,37 +312,13 @@
                 <p class="sub-info">Catat arus uang pinjaman masuk atau keluar dari dompetmu.</p>
                 
                 <div class="tab-container" style="margin-top: 15px;">
-                    <button class="tab-btn active" id="tab-piutang-btn" onclick="switchDebtForm('piutang')">Piutang</button>
-                    <button class="tab-btn" id="tab-hutang-btn" onclick="switchDebtForm('hutang')">Hutang</button>
-                </div>
-
-                <!-- FORM PIUTANG (Uang Kita Keluar) -->
-                <div id="card-piutang">
-                    <form id="form-piutang">
-                        <div class="input-group">
-                            <label>Nama Peminjam</label>
-                            <input type="text" id="piutang-nama" placeholder="Si A pinjam uang..." required>
-                        </div>
-                        <div class="input-group-row">
-                            <div class="input-group">
-                                <label>Nominal Rp</label>
-                                <input type="text" inputmode="numeric" id="piutang-jumlah" class="format-uang" placeholder="Contoh: 100.000" required>
-                            </div>
-                            <div class="input-group">
-                                <label>Ambil dari Dompet</label>
-                                <select id="piutang-metode" required></select>
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Catatan Opsional</label>
-                            <input type="text" id="piutang-catatan" placeholder="Cth: Lunas akhir bulan...">
-                        </div>
-                        <button type="submit" class="btn btn-income" style="background-color: #3B82F6">Buat Catatan Piutang</button>
-                    </form>
+                    <!-- Posisi Ditukar: Hutang Kiri, Piutang Kanan -->
+                    <button class="tab-btn active" id="tab-hutang-btn" onclick="switchDebtForm('hutang')">Hutang</button>
+                    <button class="tab-btn" id="tab-piutang-btn" onclick="switchDebtForm('piutang')">Piutang</button>
                 </div>
 
                 <!-- FORM HUTANG (Uang Masuk Ke Kita) -->
-                <div id="card-hutang" style="display: none;">
+                <div id="card-hutang">
                     <form id="form-hutang">
                         <div class="input-group">
                             <label>Nama Pemberi Pinjaman</label>
@@ -362,16 +338,50 @@
                             <label>Catatan Opsional</label>
                             <input type="text" id="hutang-catatan" placeholder="Cth: Janji ganti besok...">
                         </div>
-                        <button type="submit" class="btn btn-income" style="background-color: #8B5CF6">Buat Catatan Hutang</button>
+                        <button type="submit" class="btn btn-income" style="background-color: var(--primary-orange)">Buat Catatan Hutang</button>
+                    </form>
+                </div>
+
+                <!-- FORM PIUTANG (Uang Kita Keluar) -->
+                <div id="card-piutang" style="display: none;">
+                    <form id="form-piutang">
+                        <div class="input-group">
+                            <label>Nama Peminjam</label>
+                            <input type="text" id="piutang-nama" placeholder="Si A pinjam uang..." required>
+                        </div>
+                        <div class="input-group">
+                            <label>Potong dari Alokasi Dana</label>
+                            <!-- Opsi Tabungan dihapus agar tidak tersentuh -->
+                            <select id="piutang-kategori" required>
+                                <option value="kebutuhan">Kebutuhan</option>
+                                <option value="keinginan">Keinginan</option>
+                            </select>
+                        </div>
+                        <div class="input-group-row">
+                            <div class="input-group">
+                                <label>Nominal Rp</label>
+                                <input type="text" inputmode="numeric" id="piutang-jumlah" class="format-uang" placeholder="Contoh: 100.000" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Ambil dari Dompet</label>
+                                <select id="piutang-metode" required></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Catatan Opsional</label>
+                            <input type="text" id="piutang-catatan" placeholder="Cth: Lunas akhir bulan...">
+                        </div>
+                        <button type="submit" class="btn btn-income" style="background-color: var(--primary-orange)">Buat Catatan Piutang</button>
                     </form>
                 </div>
 
                 <div class="list-plan-container" style="margin-top:20px;">
-                    <h4 style="color: #3B82F6; margin-bottom: 5px;">Daftar Piutang (Orang Ngutang):</h4>
-                    <div id="list-piutang"></div>
-                    
-                    <h4 style="color: #8B5CF6; margin-top: 20px; margin-bottom: 5px;">Daftar Hutang (Kita Ngutang):</h4>
+                    <!-- Judul diubah ke hitam dan teks dibersihkan -->
+                    <h4 style="color: var(--text-main); margin-bottom: 5px;">Daftar Hutang:</h4>
                     <div id="list-hutang"></div>
+
+                    <h4 style="color: var(--text-main); margin-top: 20px; margin-bottom: 5px;">Daftar Piutang:</h4>
+                    <div id="list-piutang"></div>
                 </div>
             </div>
 
