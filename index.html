@@ -27,7 +27,7 @@
             </div>
         </header>
 
-        <!-- KARTU SALDO UTAMA (Dengan Ikon Mata) -->
+        <!-- KARTU SALDO UTAMA -->
         <div class="balance-card" onclick="toggleBreakdown(event)">
             <div class="balance-header-row">
                 <span class="balance-title">TOTAL SALDO</span>
@@ -275,9 +275,10 @@
                 </div>
             </div>
 
+            <!-- FORM TARGET & TAGIHAN -->
             <div class="form-card">
                 <h3>Target & Tagihan</h3>
-                <p class="sub-info">Catat impian menabung atau cicilan/tagihan belanjaanmu.</p>
+                <p class="sub-info">Catat impian menabung atau cicilan tagihan belanjaanmu.</p>
                 <form id="form-goals" style="margin-top:15px;">
                     <div class="input-group">
                         <label>Nama Target / Tagihan</label>
@@ -300,39 +301,77 @@
                     <button type="submit" class="btn btn-income" style="background-color: var(--income-green)">Buat Daftar Baru</button>
                 </form>
                 <div class="list-plan-container" style="margin-top:20px;">
-                    <h4>Progress Target/Tagihan Kamu:</h4>
+                    <h4>Progress Target & Tagihan:</h4>
                     <div id="list-goals"></div>
                 </div>
             </div>
 
-            <!-- FORM BARU: CATATAN PIUTANG (ORANG BERHUTANG) -->
+            <!-- FORM HUTANG PIUTANG -->
             <div class="form-card">
-                <h3>Catatan Piutang (Orang Ngutang)</h3>
-                <p class="sub-info">Catat uangmu yang dipinjam orang. Otomatis memotong saldomu sekarang, dan menambah saldomu kembali saat ia bayar lunas/nyicil.</p>
-                <form id="form-piutang" style="margin-top:15px;">
-                    <div class="input-group">
-                        <label>Nama Peminjam / Hal</label>
-                        <input type="text" id="piutang-nama" placeholder="Si A pinjam uang buat..." required>
-                    </div>
-                    <div class="input-group-row">
+                <h3>Hutang & Piutang</h3>
+                <p class="sub-info">Catat arus uang pinjaman masuk atau keluar dari dompetmu.</p>
+                
+                <div class="tab-container" style="margin-top: 15px;">
+                    <button class="tab-btn active" id="tab-piutang-btn" onclick="switchDebtForm('piutang')">Piutang</button>
+                    <button class="tab-btn" id="tab-hutang-btn" onclick="switchDebtForm('hutang')">Hutang</button>
+                </div>
+
+                <!-- FORM PIUTANG (Uang Kita Keluar) -->
+                <div id="card-piutang">
+                    <form id="form-piutang">
                         <div class="input-group">
-                            <label>Nominal Dipinjam Rp</label>
-                            <input type="text" inputmode="numeric" id="piutang-jumlah" class="format-uang" placeholder="Contoh: 100.000" required>
+                            <label>Nama Peminjam</label>
+                            <input type="text" id="piutang-nama" placeholder="Si A pinjam uang..." required>
+                        </div>
+                        <div class="input-group-row">
+                            <div class="input-group">
+                                <label>Nominal Rp</label>
+                                <input type="text" inputmode="numeric" id="piutang-jumlah" class="format-uang" placeholder="Contoh: 100.000" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Ambil dari Dompet</label>
+                                <select id="piutang-metode" required></select>
+                            </div>
                         </div>
                         <div class="input-group">
-                            <label>Diambil dari Dompet</label>
-                            <select id="piutang-metode" required></select>
+                            <label>Catatan Opsional</label>
+                            <input type="text" id="piutang-catatan" placeholder="Cth: Lunas akhir bulan...">
                         </div>
-                    </div>
-                    <div class="input-group">
-                        <label>Catatan (Opsional)</label>
-                        <input type="text" id="piutang-catatan" placeholder="Cth: Janji lunas akhir bulan...">
-                    </div>
-                    <button type="submit" class="btn btn-income" style="background-color: #3B82F6">Buat Catatan Hutang</button>
-                </form>
+                        <button type="submit" class="btn btn-income" style="background-color: #3B82F6">Buat Catatan Piutang</button>
+                    </form>
+                </div>
+
+                <!-- FORM HUTANG (Uang Masuk Ke Kita) -->
+                <div id="card-hutang" style="display: none;">
+                    <form id="form-hutang">
+                        <div class="input-group">
+                            <label>Nama Pemberi Pinjaman</label>
+                            <input type="text" id="hutang-nama" placeholder="Pinjam uang dari B..." required>
+                        </div>
+                        <div class="input-group-row">
+                            <div class="input-group">
+                                <label>Nominal Rp</label>
+                                <input type="text" inputmode="numeric" id="hutang-jumlah" class="format-uang" placeholder="Contoh: 50.000" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Simpan ke Dompet</label>
+                                <select id="hutang-metode" required></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Catatan Opsional</label>
+                            <input type="text" id="hutang-catatan" placeholder="Cth: Janji ganti besok...">
+                        </div>
+                        <button type="submit" class="btn btn-income" style="background-color: #8B5CF6">Buat Catatan Hutang</button>
+                    </form>
+                </div>
+
                 <div class="list-plan-container" style="margin-top:20px;">
-                    <h4>Daftar Orang Berhutang:</h4>
+                    <h4 style="color: #3B82F6; margin-bottom: 5px;">Daftar Piutang (Orang Ngutang):</h4>
                     <div id="list-piutang"></div>
+                    
+                    <h4 style="color: #8B5CF6; margin-top: 20px; margin-bottom: 5px;">Daftar Hutang (Kita Ngutang):</h4>
+                    <div id="list-hutang"></div>
                 </div>
             </div>
 
@@ -353,18 +392,22 @@
                 <span class="close-modal" onclick="closeMethodModal()">&times;</span>
             </div>
             <p class="sub-info" style="margin-bottom: 15px;">Tambahkan e-wallet atau bank baru beserta logonya.</p>
+            
             <div class="input-group">
-                <label>Nama Metode (Misal: OVO, BSI)</label>
+                <label>Nama Metode</label>
                 <input type="text" id="new-method-name" placeholder="Ketik nama metode...">
             </div>
             <div class="input-group">
-                <label>Upload Ikon / Logo (Opsional)</label>
+                <label>Upload Ikon / Logo</label>
                 <input type="file" id="new-method-file" accept="image/png, image/jpeg, image/jpg" style="padding: 10px;">
                 <p style="font-size: 0.7rem; color: #8492A6; margin-top: 4px;">*Gunakan file kecil rasio kotak 1:1.</p>
             </div>
             <button class="btn btn-income" onclick="saveNewMethod()" style="margin-bottom: 20px;">Tambah Metode</button>
-            <h4 style="font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Daftar Metode Tersimpan</h4>
-            <ul id="modal-method-list" class="transaction-list" style="max-height: 150px; overflow-y: auto;"></ul>
+            
+            <h4 style="font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Daftar Tersimpan</h4>
+            <ul id="modal-method-list" class="transaction-list" style="max-height: 150px; overflow-y: auto;">
+                <!-- List dirender via JS -->
+            </ul>
         </div>
     </div>
 
