@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pockita - Cutting Through Your Daily Expenses</title>
+    
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -263,33 +264,33 @@
             </div>
 
             <div class="form-card">
-                <h3>Target Menabung</h3>
-                <p class="sub-info">Bantu kamu konsisten menyisihkan uang buat impian.</p>
+                <h3>Target & Tagihan</h3>
+                <p class="sub-info">Catat impian menabung atau cicilan/tagihan belanjaanmu.</p>
                 <form id="form-goals" style="margin-top:15px;">
                     <div class="input-group">
-                        <label>Nama Barang / Impian</label>
-                        <input type="text" id="goal-nama" placeholder="Beli Laptop Gaming..." required>
+                        <label>Nama Target / Tagihan</label>
+                        <input type="text" id="goal-nama" placeholder="Beli Laptop, COD Sepatu..." required>
                     </div>
                     
                     <div class="input-group">
-                        <label>Kategori Tujuan Tabungan</label>
+                        <label>Potong dari Alokasi Dana</label>
                         <select id="goal-kategori" required>
-                            <option value="tabungan">Tabungan (Investasi)</option>
-                            <option value="keinginan">Keinginan (Beli Barang/Liburan)</option>
-                            <option value="kebutuhan">Kebutuhan (Dana Darurat)</option>
+                            <option value="tabungan">Tabungan</option>
+                            <option value="keinginan">Keinginan</option>
+                            <option value="kebutuhan">Kebutuhan</option>
                         </select>
                     </div>
 
                     <div class="input-group-row">
                         <div class="input-group">
-                            <label>Target Uang Rp</label>
+                            <label>Target Uang / Tagihan Rp</label>
                             <input type="text" inputmode="numeric" id="goal-target" class="format-uang" placeholder="Contoh: 10.000.000" required>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-income" style="background-color: var(--income-green)">Buat Target Baru</button>
+                    <button type="submit" class="btn btn-income" style="background-color: var(--income-green)">Buat Daftar Baru</button>
                 </form>
                 <div class="list-plan-container" style="margin-top:20px;">
-                    <h4>Progress Tabungan Kamu:</h4>
+                    <h4>Progress Target/Tagihan Kamu:</h4>
                     <div id="list-goals"></div>
                 </div>
             </div>
