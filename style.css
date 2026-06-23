@@ -161,8 +161,6 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .plan-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--bg-app); font-size: 0.9rem; align-items: center;}
 .goal-box { background-color: var(--bg-app); border: 1px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 15px; position: relative;}
 
-.empty-goal-img { position: absolute; right: 15px; bottom: 15px; width: 45px; height: 45px; opacity: 0.2; pointer-events: none;}
-
 .goal-info { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; z-index: 2; position: relative;}
 .progress-bar-bg { background-color: #EAECEF; height: 12px; border-radius: 20px; width: 100%; overflow: hidden; position: relative; margin-bottom: 12px; z-index: 2;}
 .progress-bar-fill { background-color: var(--primary-orange); height: 100%; width: 0%; transition: width 0.3s; }
@@ -181,7 +179,7 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .close-modal:hover { color: var(--expense-red); }
 
 /* =========================================
-   Footer Ilustrasi Mentok Bawah & Samping (Perbaikan Cropping)
+   Footer Ilustrasi Mentok Bawah & Samping
    ========================================= */
 .app-footer {
     position: relative;
