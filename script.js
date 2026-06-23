@@ -695,17 +695,25 @@ document.getElementById('form-goals').addEventListener('submit', function(e){
 function tambahTabunganGoal(id) {
     const inputEl = document.getElementById(`input-add-goal-${id}`);
     const methodEl = document.getElementById(`method-add-goal-${id}`); 
-    const moneyToAdd = parseUang(inputEl.value);
+    let moneyToAdd = parseUang(inputEl.value);
     const selectedMethod = methodEl.value;
     
     if(moneyToAdd <= 0) return;
+
+    const goal = savingsGoals.find(g => g.id === id);
+    let collectedAmount = transactions.filter(tx => tx.goalId === goal.id).reduce((sum, tx) => sum + tx.amount, 0);
+    let remaining = goal.target - collectedAmount;
+
+    // FITUR BATAS LUNAS: Mencegah user membayar lebih dari target
+    if (moneyToAdd > remaining) {
+        moneyToAdd = remaining;
+        alert(`Nominal pembayaran dilebihkan. Sistem otomatis menyesuaikannya dengan sisa tagihan/target (Rp ${formatRupiah(remaining)}).`);
+    }
 
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0];
     const timeStr = now.toTimeString().split(' ')[0].slice(0,5);
 
-    const goal = savingsGoals.find(g => g.id === id);
-    
     transactions.push({
         id: Date.now(),
         type: 'expense',
@@ -773,21 +781,39 @@ function renderPlans() {
 
             let specificSelect = selectHtml.replace('<select class=', `<select id="method-add-goal-${g.id}" class=`);
 
+            // CEK APAKAH SUDAH LUNAS (100%)
+            let isCompleted = collectedAmount >= g.target;
+            let actionHTML = '';
+            
+            if (isCompleted) {
+                // UI Jika Lunas (Hanya tulisan Lunas dan tombol Hapus)
+                actionHTML = `
+                    <span style="color: var(--income-green); font-weight: 700; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                        ✓ LUNAS / TERCAPAI
+                    </span>
+                    <button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('goal', ${g.id})">${iconDelete}</button>
+                `;
+            } else {
+                // UI Jika Belum Lunas (Ada form input nominal)
+                actionHTML = `
+                    <input type="text" id="input-add-goal-${g.id}" class="format-uang" placeholder="+ Nominal">
+                    ${specificSelect}
+                    <button class="btn-add-goal" onclick="tambahTabunganGoal(${g.id})">Setor</button>
+                    <button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('goal', ${g.id})">${iconDelete}</button>
+                `;
+            }
+
             containerGoals.innerHTML += `
                 <div class="goal-box">
-                    <img src="pochita-sleep.png" class="empty-goal-img" style="display: ${collectedAmount === 0 ? 'block' : 'none'};">
                     <div class="goal-info">
                         <span><b>${g.name}</b> <br><small style="color:var(--text-muted); font-weight:normal;">| ${catDisplay}</small></span>
                         <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(g.target)}</small></span>
                     </div>
                     <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: ${pct}%;"></div>
+                        <div class="progress-bar-fill" style="width: ${pct}%; ${isCompleted ? 'background-color: var(--income-green);' : ''}"></div>
                     </div>
                     <div class="goal-actions" style="margin-top: 15px;">
-                        <input type="text" id="input-add-goal-${g.id}" class="format-uang" placeholder="+ Nominal">
-                        ${specificSelect}
-                        <button class="btn-add-goal" onclick="tambahTabunganGoal(${g.id})">Tabung</button>
-                        <button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('goal', ${g.id})">${iconDelete}</button>
+                        ${actionHTML}
                     </div>
                 </div>`;
         });
