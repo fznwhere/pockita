@@ -17,21 +17,23 @@
 body { background-color: var(--bg-app); color: var(--text-main); display: flex; justify-content: center; padding: 20px 10px 0px 10px; }
 .app-container { width: 100%; max-width: 500px; } 
 
-/* Header & Logo */
+/* HEADER & TATA LETAK TOMBOL MEMBER ESTETIS */
 .app-header { margin-bottom: 25px; }
-.header-top { display: flex; justify-content: space-between; align-items: center; padding: 0 10px;}
+.header-top { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; margin-bottom: 15px; }
 .header-brand { display: flex; align-items: center; gap: 15px; }
 .app-logo { width: 55px; height: 55px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(232, 93, 4, 0.15)); }
 .brand-text h1 { color: var(--primary-orange); font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin-bottom: 2px;}
 .brand-text .tagline { color: var(--text-muted); font-size: 0.85rem; font-weight: 500;}
 
-.header-actions { display: flex; align-items: center; gap: 10px; margin-top: 15px; padding: 0 10px;}
-.month-picker-container { flex: 1; }
-.borderless-picker { padding: 4px 0; border: none; font-size: 1.1rem; font-weight: 700; color: var(--primary-orange); outline: none; background: transparent; cursor: pointer; width: 100%;}
-.btn-member { background: #FFF2EC; color: var(--primary-orange); border: none; padding: 6px 12px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(232, 93, 4, 0.15); transition: 0.2s;}
+/* Desain Premium Tombol Member di Pojok */
+.btn-member { background: var(--white); border: 1.5px solid var(--border-color); border-radius: 12px; width: 45px; height: 45px; font-size: 1.4rem; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s; }
+.btn-member:hover { border-color: var(--primary-orange); color: var(--primary-orange); }
 .btn-member:active { transform: scale(0.95); }
 
-/* Saldo Card */
+.month-picker-container { padding: 0 10px;}
+.borderless-picker { padding: 4px 0; border: none; font-size: 1.1rem; font-weight: 700; color: var(--primary-orange); outline: none; background: transparent; cursor: pointer; width: 100%;}
+
+/* Saldo Card & Toggle Eye */
 .balance-card { background: linear-gradient(135deg, #FF7B4A, var(--primary-orange)); color: var(--white); padding: 28px 20px; border-radius: 24px; box-shadow: var(--card-shadow); margin-bottom: 25px; text-align: center; cursor: pointer; transition: transform 0.2s; }
 .balance-card:active { transform: scale(0.98); }
 .balance-header-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -69,7 +71,7 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .btn { width: 100%; padding: 15px; border: none; border-radius: 16px; font-size: 1.05rem; font-weight: 700; color: var(--white); cursor: pointer; transition: 0.2s; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
 .btn-income { background-color: var(--income-green); }
 .btn-expense { background-color: var(--expense-red); }
-.btn-transfer { background-color: #8492A6; } /* Warna abu-abu elegan untuk transfer */
+.btn-transfer { background-color: #8492A6; } 
 .btn:active { transform: scale(0.98); }
 
 /* Flip Card */
@@ -134,14 +136,14 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .pill-outline-target { border-color: #2980B9; color: #2980B9; } 
 .pill-outline-piutang { border-color: var(--income-green); color: var(--income-green); } 
 .pill-outline-hutang { border-color: var(--expense-red); color: var(--expense-red); }
-.pill-outline-transfer { border-color: #8492A6; color: #8492A6; } /* Warna Transfer */
+.pill-outline-transfer { border-color: #8492A6; color: #8492A6; } 
 
 .tx-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
 .tx-kanan { text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;}
 .tx-amount { font-weight: 700; font-size: 1rem; margin-bottom: 8px;}
 .tx-income { color: var(--income-green); }
 .tx-expense { color: var(--expense-red); }
-.tx-transfer { color: #8492A6; } /* Amount warna abu untuk transfer */
+.tx-transfer { color: #8492A6; } 
 
 .tx-actions { display: flex; gap: 8px; }
 .btn-edit, .btn-delete { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s;}
