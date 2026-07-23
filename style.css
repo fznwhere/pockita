@@ -25,10 +25,13 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .brand-text h1 { color: var(--primary-orange); font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin-bottom: 2px;}
 .brand-text .tagline { color: var(--text-muted); font-size: 0.85rem; font-weight: 500;}
 
-.month-picker-container { display: flex; align-items: center; margin-top: 15px; padding: 0 10px;}
+.header-actions { display: flex; align-items: center; gap: 10px; margin-top: 15px; padding: 0 10px;}
+.month-picker-container { flex: 1; }
 .borderless-picker { padding: 4px 0; border: none; font-size: 1.1rem; font-weight: 700; color: var(--primary-orange); outline: none; background: transparent; cursor: pointer; width: 100%;}
+.btn-member { background: #FFF2EC; color: var(--primary-orange); border: none; padding: 6px 12px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(232, 93, 4, 0.15); transition: 0.2s;}
+.btn-member:active { transform: scale(0.95); }
 
-/* Saldo Card & Toggle Eye */
+/* Saldo Card */
 .balance-card { background: linear-gradient(135deg, #FF7B4A, var(--primary-orange)); color: var(--white); padding: 28px 20px; border-radius: 24px; box-shadow: var(--card-shadow); margin-bottom: 25px; text-align: center; cursor: pointer; transition: transform 0.2s; }
 .balance-card:active { transform: scale(0.98); }
 .balance-header-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -66,12 +69,12 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .btn { width: 100%; padding: 15px; border: none; border-radius: 16px; font-size: 1.05rem; font-weight: 700; color: var(--white); cursor: pointer; transition: 0.2s; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
 .btn-income { background-color: var(--income-green); }
 .btn-expense { background-color: var(--expense-red); }
+.btn-transfer { background-color: #8492A6; } /* Warna abu-abu elegan untuk transfer */
 .btn:active { transform: scale(0.98); }
 
-/* Status Keuangan Flip Card */
+/* Flip Card */
 .status-budget-card h3 { font-size: 1.05rem; margin-bottom: 15px; text-align: center;}
 .status-grid { display: flex; gap: 12px; perspective: 1000px; } 
-
 .flip-card { flex: 1; background-color: transparent; height: 110px; cursor: pointer; }
 .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
 .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
@@ -88,17 +91,15 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .flip-card-back .lbl-back { font-size: 0.75rem; font-weight: 600; opacity: 0.9; margin-bottom: 4px; }
 .flip-card-back .nominal-back { font-size: 1.1rem; font-weight: 700; word-break: break-all;}
 
-/* Charts & Empty States */
+/* Charts & History */
 .charts-card { display: flex; flex-direction: column; gap: 30px; }
 .chart-wrapper { width: 100%; text-align: center; position: relative; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;}
 .chart-wrapper h4 { font-size: 1rem; margin-bottom: 10px; color: var(--text-main); }
 .chart-wrapper canvas { max-height: 220px !important; margin: 0 auto; }
-
 .chart-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 20px 0;}
 .empty-state-img { width: 70px; height: 70px; object-fit: contain; opacity: 0.9; }
 .empty-neon-orange { filter: drop-shadow(0 0 15px rgba(232, 93, 4, 0.8)); } 
 
-/* History & Date Grouping */
 .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--bg-app); padding-bottom: 12px; }
 .history-header h3 { font-size: 1.05rem; color: var(--text-main); }
 .history-actions { display: flex; gap: 8px; }
@@ -123,9 +124,7 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .tx-title { font-weight: 600; font-size: 1rem; word-break: break-all; line-height: 1.3;}
 .pill-container { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;}
 
-/* =========================================
-   PILIHAN GAYA PIL MODERN (OUTLINE) 
-   ========================================= */
+/* PIL OUTLINE MODERN */
 .pill-outline { font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; letter-spacing: 0.5px; border: 1.5px solid; background-color: transparent;}
 .pill-outline-kebutuhan { border-color: var(--income-green); color: var(--income-green); }
 .pill-outline-keinginan { border-color: var(--secondary-orange); color: var(--secondary-orange); }
@@ -135,12 +134,14 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .pill-outline-target { border-color: #2980B9; color: #2980B9; } 
 .pill-outline-piutang { border-color: var(--income-green); color: var(--income-green); } 
 .pill-outline-hutang { border-color: var(--expense-red); color: var(--expense-red); }
+.pill-outline-transfer { border-color: #8492A6; color: #8492A6; } /* Warna Transfer */
 
 .tx-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
 .tx-kanan { text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;}
 .tx-amount { font-weight: 700; font-size: 1rem; margin-bottom: 8px;}
 .tx-income { color: var(--income-green); }
 .tx-expense { color: var(--expense-red); }
+.tx-transfer { color: #8492A6; } /* Amount warna abu untuk transfer */
 
 .tx-actions { display: flex; gap: 8px; }
 .btn-edit, .btn-delete { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s;}
@@ -160,7 +161,7 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .person-header:hover { background: #FFE5D9; }
 .person-content { padding: 15px; display: none; background: transparent; border-top: 1px solid var(--border-color); }
 
-/* Kotak Goal Standar & Di Dalam Akordeon */
+/* Kotak Goal */
 .goal-box { background-color: var(--bg-app); border: 1px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 15px; position: relative;}
 .person-content .goal-box { margin-bottom: 12px; background: var(--white); border: 1px solid var(--border-color); box-shadow: none;}
 .person-content .goal-box:last-child { margin-bottom: 0; }
@@ -172,10 +173,9 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .goal-actions input { flex: 1; min-width: 90px; padding: 8px 12px; font-size: 0.85rem; border-radius: 10px; border: 1px solid var(--border-color); }
 .goal-actions select { padding: 8px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--white); font-weight:600;}
 .btn-add-goal { background-color: var(--primary-orange); border: none; color: white; padding: 6px 12px; font-size: 0.8rem; border-radius: 10px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(232, 93, 4, 0.2);}
-
 .piutang-note { font-size: 0.8rem; color: var(--text-muted); background: #FFF2EC; padding: 8px 12px; border-radius: 10px; margin-bottom: 10px; display: inline-block;}
 
-/* Modal */
+/* Modal & Kartu Member */
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(26, 26, 36, 0.6); backdrop-filter: blur(3px); }
 .modal-content { background-color: var(--white); margin: 15% auto; padding: 25px; border-radius: 24px; width: 90%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalFadeIn 0.3s;}
 @keyframes modalFadeIn { from {opacity: 0; transform: translateY(-20px);} to {opacity: 1; transform: translateY(0);} }
@@ -184,6 +184,17 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .close-modal { color: var(--text-muted); font-size: 28px; font-weight: bold; cursor: pointer; }
 .close-modal:hover { color: var(--expense-red); }
 
-/* Footer Ilustrasi */
+.member-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.member-card-item { background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; text-align: center; position: relative;}
+.member-card-img { width: 100%; height: 80px; object-fit: contain; border-radius: 8px; background: white; margin-bottom: 8px; cursor: pointer;}
+.member-card-name { font-size: 0.8rem; font-weight: 700; color: var(--text-main); word-break: break-all;}
+.member-card-delete { position: absolute; top: -5px; right: -5px; background: var(--expense-red); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+
+/* Fullscreen Image Preview */
+.fullscreen-overlay { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); justify-content: center; align-items: center;}
+.fullscreen-img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 12px;}
+.close-fullscreen { position: absolute; top: 20px; right: 20px; color: white; font-size: 35px; font-weight: bold; cursor: pointer; }
+
+/* Footer */
 .app-footer { position: relative; margin-top: 15px; margin-left: -10px; margin-right: -10px; border-radius: 0; overflow: hidden; display: flex; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 40%); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 40%); }
 .footer-bg { width: 100%; height: auto; display: block; }
