@@ -5,7 +5,6 @@ let debtsData = JSON.parse(localStorage.getItem('pockita_debts')) || [];
 let recurringAppliedMonths = JSON.parse(localStorage.getItem('pockita_applied_months')) || [];
 let isBalanceHidden = JSON.parse(localStorage.getItem('pockita_hide_balance')) || false; 
 
-// DATA KARTU MEMBER
 let memberCards = JSON.parse(localStorage.getItem('pockita_members')) || [];
 
 let pockitaMethods = JSON.parse(localStorage.getItem('pockita_custom_methods')) || {
@@ -143,8 +142,9 @@ function deleteMethod(name) {
 }
 
 // ================= FITUR KARTU MEMBER =================
-function openMemberModal() { document.getElementById('memberModal').style.display = 'block'; renderMemberCards(); }
-function closeMemberModal() { document.getElementById('memberModal').style.display = 'none'; }
+// MEMASTIKAN FUNGSI TERBACA GLOBAL
+window.openMemberModal = function() { document.getElementById('memberModal').style.display = 'block'; renderMemberCards(); }
+window.closeMemberModal = function() { document.getElementById('memberModal').style.display = 'none'; }
 
 function saveMemberCard() {
     const nameInput = document.getElementById('new-member-name');
@@ -238,7 +238,6 @@ function renderApp() {
     transactionContainer.innerHTML = '';
     let grandTotalSaldo = 0; let balancesByMethod = {};
 
-    // LOGIKA PERHITUNGAN SALDO (SUPPORT TRANSFER)
     transactions.forEach(tx => {
         if (!balancesByMethod[tx.method]) balancesByMethod[tx.method] = 0;
         if (tx.type === 'income') { 
@@ -247,9 +246,8 @@ function renderApp() {
             grandTotalSaldo -= tx.amount; balancesByMethod[tx.method] -= tx.amount; 
         } else if (tx.type === 'transfer') {
             if (!balancesByMethod[tx.methodTo]) balancesByMethod[tx.methodTo] = 0;
-            balancesByMethod[tx.method] -= tx.amount; // Uang keluar dari dompet asal
-            balancesByMethod[tx.methodTo] += tx.amount; // Uang masuk ke dompet tujuan
-            // grandTotalSaldo TIDAK BERUBAH karena hanya pindah tempat
+            balancesByMethod[tx.method] -= tx.amount; 
+            balancesByMethod[tx.methodTo] += tx.amount; 
         }
     });
 
@@ -285,7 +283,6 @@ function renderApp() {
         filterMetode.innerHTML += `<option value="${method}" ${isSelected}>${method}</option>`;
     });
 
-    // Modifikasi Filter Dompet untuk Transfer (tampil di dompet asal maupun tujuan)
     if (currentFilter !== 'Semua') { 
         displayTransactions = displayTransactions.filter(tx => tx.method === currentFilter || (tx.type === 'transfer' && tx.methodTo === currentFilter)); 
     }
@@ -295,11 +292,8 @@ function renderApp() {
     } else {
         const groupedTx = {};
         displayTransactions.forEach(tx => {
-            // Group ke dompet utama (Asal)
             if (!groupedTx[tx.method]) groupedTx[tx.method] = [];
             groupedTx[tx.method].push(tx);
-            
-            // Khusus Transfer, jika difilter spesifik dompet tujuan, pastikan tetap tampil
             if (tx.type === 'transfer' && currentFilter !== 'Semua' && tx.methodTo === currentFilter && tx.method !== currentFilter) {
                 if (!groupedTx[tx.methodTo]) groupedTx[tx.methodTo] = [];
                 groupedTx[tx.methodTo].push(tx);
@@ -316,7 +310,6 @@ function renderApp() {
             const txsByDate = {};
             groupedTx[method].forEach(tx => {
                 if(!txsByDate[tx.date]) txsByDate[tx.date] = [];
-                // Cegah duplikasi saat render
                 if(!txsByDate[tx.date].find(x => x.id === tx.id)) txsByDate[tx.date].push(tx);
             });
 
@@ -369,10 +362,8 @@ function renderApp() {
                     let txColorClass = tx.type === 'income' ? 'tx-income' : 'tx-expense';
                     let sign = tx.type === 'income' ? '+' : '-';
 
-                    // Modifikasi tampilan khusus untuk transfer
                     if (isTransfer) {
-                        txColorClass = 'tx-transfer';
-                        sign = '';
+                        txColorClass = 'tx-transfer'; sign = '';
                         cleanDesc = `Ke ${tx.methodTo} ${tx.desc ? ' - '+tx.desc : ''}`;
                         if (currentFilter !== 'Semua' && tx.methodTo === currentFilter) {
                             cleanDesc = `Dari ${tx.method} ${tx.desc ? ' - '+tx.desc : ''}`;
@@ -459,10 +450,9 @@ function resetFormButtons() {
     editingTxId = null;
 }
 
-// SIMPAN TRANSAKSI DENGAN DUKUNGAN TRANSFER
 function simpanTransaksi(type, idAmount, idDesc, idDate, idTime, idMethod, idKategori = null, idMethodTo = null) {
     const amount = parseUang(document.getElementById(idAmount).value);
-    const desc = idDesc ? document.getElementById(idDesc).value : ''; // Untuk transfer opsional
+    const desc = idDesc ? document.getElementById(idDesc).value : ''; 
     const date = document.getElementById(idDate).value;
     const time = document.getElementById(idTime).value;
     const method = document.getElementById(idMethod).value;
@@ -513,7 +503,6 @@ function hapusTransaksi(id) {
 
 function renderCharts() {
     const activeMonth = getSelectedMonth();
-    // Hanya hitung Income dan Expense (Abaikan Transfer)
     const monthlyTx = transactions.filter(tx => tx.date.startsWith(activeMonth) && tx.type !== 'transfer');
     let totalPemasukanBulanIni = monthlyTx.filter(tx => tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0);
 
@@ -634,7 +623,6 @@ function renderBarChartKomparasi() {
     });
 }
 
-// LOGIKA INPUT FORM RENCANA
 document.getElementById('form-berulang').addEventListener('submit', function(e){
     e.preventDefault();
     const amount = parseUang(document.getElementById('recur-jumlah').value);
@@ -757,6 +745,7 @@ function hapusPlan(type, id) {
     if (type === 'debt') {
         const debt = debtsData.find(x => x.id === id);
         let collectedAmount = 0;
+        
         if (debt.type === 'piutang') {
             collectedAmount = transactions.filter(tx => tx.debtId === id && tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0);
         } else {
@@ -764,14 +753,19 @@ function hapusPlan(type, id) {
         }
         
         let confirmMsg = "Hapus item ini? (Riwayat saldo di menu Transaksi yang sudah terlanjur dicicil tidak akan berubah)";
-        if (collectedAmount === 0) { confirmMsg = "Hapus item ini? Karena belum ada cicilan yang dibayar, sistem juga akan menghapus transaksi awalnya di Riwayat agar saldomu kembali normal."; }
+        
+        if (collectedAmount === 0) {
+            confirmMsg = "Hapus item ini? Karena belum ada cicilan yang dibayar, sistem juga akan menghapus transaksi awalnya di Riwayat agar saldomu kembali normal (Tarik Dana/Batal).";
+        }
 
         if (confirm(confirmMsg)) {
             debtsData = debtsData.filter(x => x.id !== id);
+            
             if (collectedAmount === 0) {
                 transactions = transactions.filter(tx => tx.debtId !== id);
                 localStorage.setItem('pockita_tx', JSON.stringify(transactions));
             }
+            
             localStorage.setItem('pockita_debts', JSON.stringify(debtsData));
             renderApp();
         }
@@ -802,20 +796,28 @@ function renderGroupedDebts(list, container, typeStr) {
     let html = '';
     for (let key in groups) {
         let g = groups[key];
-        let totalTarget = 0; let totalCollected = 0; let itemsHtml = '';
+        let totalTarget = 0;
+        let totalCollected = 0;
+        let itemsHtml = '';
         
         g.items.forEach(d => {
             let collected = 0;
-            if (d.type === 'piutang') { collected = transactions.filter(tx => tx.debtId === d.id && tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0); } 
-            else { collected = transactions.filter(tx => tx.debtId === d.id && tx.type === 'expense').reduce((sum, tx) => sum + tx.amount, 0); }
+            if (d.type === 'piutang') {
+                collected = transactions.filter(tx => tx.debtId === d.id && tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0);
+            } else {
+                collected = transactions.filter(tx => tx.debtId === d.id && tx.type === 'expense').reduce((sum, tx) => sum + tx.amount, 0);
+            }
             
-            totalTarget += d.target; totalCollected += collected;
+            totalTarget += d.target;
+            totalCollected += collected;
+
             const pct = Math.min(Math.round((collected / d.target) * 100), 100);
             const arrMethods = Object.keys(pockitaMethods);
             let selectHtml = `<select class="filter-dropdown" style="padding:8px; border-radius:10px;">`;
             arrMethods.forEach(m => selectHtml += `<option value="${m}">${m}</option>`);
             selectHtml += `</select>`;
             let specificSelect = selectHtml.replace('<select class=', `<select id="method-bayar-debt-${d.id}" class=`);
+            
             let isCompleted = collected >= d.target;
             
             let actionHTML = isCompleted ? 
@@ -823,22 +825,29 @@ function renderGroupedDebts(list, container, typeStr) {
                 `<input type="text" id="input-bayar-debt-${d.id}" class="format-uang" placeholder="+ Nominal">${specificSelect}<button class="btn-add-goal" onclick="bayarDebt(${d.id})">${d.type === 'piutang' ? 'Terima' : 'Bayar'}</button><button class="btn-delete" style="margin:0; width:auto; padding: 0 10px;" onclick="hapusPlan('debt', ${d.id})">${iconDelete}</button>`;
 
             let noteUI = d.note ? `<div class="piutang-note">Catatan: ${d.note}</div>` : '';
+            
             let pillUI = '';
             if (d.type === 'piutang') {
                 let safeCat = d.category ? d.category.toLowerCase() : 'umum';
                 let catColorClass = safeCat === 'kebutuhan' ? 'pill-outline-kebutuhan' : 'pill-outline-keinginan';
                 pillUI = `<span class="pill-outline ${catColorClass}">${safeCat.toUpperCase()}</span><span class="pill-outline pill-outline-method">${d.method || 'Cash'}</span>`;
-            } else { pillUI = `<span class="pill-outline pill-outline-method">${d.method || 'Cash'}</span>`; }
+            } else {
+                pillUI = `<span class="pill-outline pill-outline-method">${d.method || 'Cash'}</span>`;
+            }
 
             itemsHtml += `
             <div class="goal-box">
                 <div class="goal-info">
                     <span>
-                        <div class="pill-container" style="margin-top: 0px; margin-bottom: 6px;">${pillUI}</div>
+                        <div class="pill-container" style="margin-top: 0px; margin-bottom: 6px;">
+                            ${pillUI}
+                        </div>
                     </span>
                     <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collected)} / ${formatRupiah(d.target)}</small></span>
                 </div>
-                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${pct}%; background-color: ${isCompleted ? 'var(--income-green)' : 'var(--primary-orange)'};"></div></div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${pct}%; background-color: ${isCompleted ? 'var(--income-green)' : 'var(--primary-orange)'};"></div>
+                </div>
                 ${noteUI}
                 <div class="goal-actions" style="margin-top: 5px;">${actionHTML}</div>
             </div>`;
@@ -853,7 +862,9 @@ function renderGroupedDebts(list, container, typeStr) {
                 <span>👤 ${g.name} <small style="font-weight:normal; color:var(--text-muted);">(${groupPct}%)</small></span>
                 <span>Rp ${formatRupiah(totalTarget - totalCollected)} <small style="font-size:0.7rem">Sisa</small> ▼</span>
             </button>
-            <div class="person-content" id="${groupId}">${itemsHtml}</div>
+            <div class="person-content" id="${groupId}">
+                ${itemsHtml}
+            </div>
         </div>`;
     }
     container.innerHTML = html;
@@ -867,11 +878,13 @@ function renderPlans() {
 
     const listRecur = document.getElementById('list-berulang');
     listRecur.innerHTML = '';
-    if(recurringTemplates.length === 0){ listRecur.innerHTML = `<div class="empty-state"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Kosong">Belum ada langganan rutin.</div>`;
+    if(recurringTemplates.length === 0){
+        listRecur.innerHTML = `<div class="empty-state"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Kosong">Belum ada langganan rutin.</div>`;
     } else {
         recurringTemplates.forEach(t => {
             let safeCat = t.category ? t.category.toLowerCase() : 'umum';
             let catColorClass = safeCat === 'kebutuhan' ? 'pill-outline-kebutuhan' : 'pill-outline-keinginan';
+            
             listRecur.innerHTML += `
                 <li class="plan-item">
                     <span><b>${t.name}</b> Rp ${formatRupiah(t.amount)}<br>
@@ -887,7 +900,8 @@ function renderPlans() {
 
     const containerGoals = document.getElementById('list-goals');
     containerGoals.innerHTML = '';
-    if(savingsGoals.length === 0){ containerGoals.innerHTML = `<div class="empty-state"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Kosong">Belum ada target menabung/tagihan.</div>`;
+    if(savingsGoals.length === 0){
+        containerGoals.innerHTML = `<div class="empty-state"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Kosong">Belum ada target menabung/tagihan.</div>`;
     } else {
         savingsGoals.forEach(g => {
             let collectedAmount = transactions.filter(tx => tx.goalId === g.id).reduce((sum, tx) => sum + tx.amount, 0);
@@ -912,7 +926,9 @@ function renderPlans() {
                         </span>
                         <span style="text-align:right;">${pct}%<br><small style="font-weight:normal;">${formatRupiah(collectedAmount)} / ${formatRupiah(g.target)}</small></span>
                     </div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${pct}%; background-color: ${isCompleted ? 'var(--income-green)' : 'var(--primary-orange)'};"></div></div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${pct}%; background-color: ${isCompleted ? 'var(--income-green)' : 'var(--primary-orange)'};"></div>
+                    </div>
                     <div class="goal-actions" style="margin-top: 15px;">${actionHTML}</div>
                 </div>`;
         });
@@ -920,31 +936,40 @@ function renderPlans() {
 
     const containerHutang = document.getElementById('list-hutang');
     const containerPiutang = document.getElementById('list-piutang');
+    
     let hutangList = debtsData.filter(d => d.type === 'hutang');
     let piutangList = debtsData.filter(d => d.type === 'piutang');
 
     renderGroupedDebts(hutangList, containerHutang, 'hutang');
     renderGroupedDebts(piutangList, containerPiutang, 'piutang');
+
     attachMoneyFormat(); 
 }
 
 function updateDatalist(id, dataSet) {
     const el = document.getElementById(id);
-    if(el) { el.innerHTML = ''; dataSet.forEach(item => el.appendChild(new Option(item, item))); }
+    if(el) {
+        el.innerHTML = '';
+        dataSet.forEach(item => el.appendChild(new Option(item, item)));
+    }
 }
 
 function setDefaultDateTime() {
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0];
     const timeStr = now.toTimeString().split(' ')[0].slice(0,5);
-    document.getElementById('in-tanggal').value = dateStr; document.getElementById('out-tanggal').value = dateStr;
+    document.getElementById('in-tanggal').value = dateStr;
+    document.getElementById('out-tanggal').value = dateStr;
     if(document.getElementById('tf-tanggal')) document.getElementById('tf-tanggal').value = dateStr;
-    document.getElementById('in-waktu').value = timeStr; document.getElementById('out-waktu').value = timeStr;
+    
+    document.getElementById('in-waktu').value = timeStr;
+    document.getElementById('out-waktu').value = timeStr;
     if(document.getElementById('tf-waktu')) document.getElementById('tf-waktu').value = timeStr;
 }
 
 function exportToExcel() {
-    const activeMonth = getSelectedMonth(); let displayTx = [];
+    const activeMonth = getSelectedMonth();
+    let displayTx = [];
     if (currentHistoryMode === 'bulan') { displayTx = transactions.filter(tx => tx.date.startsWith(activeMonth)); } 
     else { const specificDate = document.getElementById('filter-hari').value; displayTx = transactions.filter(tx => tx.date === specificDate); }
     
@@ -954,7 +979,8 @@ function exportToExcel() {
     displayTx.sort((a,b) => {
         const timeA = new Date((a.date||'') + 'T' + (a.time||'00:00')).getTime() || a.id;
         const timeB = new Date((b.date||'') + 'T' + (b.time||'00:00')).getTime() || b.id;
-        if (timeA === timeB) return b.id - a.id; return timeB - timeA;
+        if (timeA === timeB) return b.id - a.id; 
+        return timeB - timeA;
     }).forEach(tx => {
         let tipe = tx.type === 'income' ? 'Pemasukan' : (tx.type === 'transfer' ? 'Mutasi' : 'Pengeluaran');
         let kat = tx.category ? tx.category.toUpperCase() : 'UMUM';
@@ -962,9 +988,11 @@ function exportToExcel() {
         let method = tx.type === 'transfer' ? `${tx.method} -> ${tx.methodTo}` : tx.method;
         csvContent += `${tx.date},${tx.time},${tipe},${kat},${dtl},${method},${tx.amount}\n`;
     });
-    const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent));
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
     let fileName = currentHistoryMode === 'bulan' ? `Pockita_Laporan_${activeMonth}.csv` : `Pockita_Laporan_Harian_${document.getElementById('filter-hari').value}.csv`;
-    link.setAttribute("download", fileName); document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 
 initMonthPicker();
