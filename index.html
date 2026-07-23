@@ -14,19 +14,20 @@
     <div class="app-container">
         <!-- HEADER -->
         <header class="app-header">
-            <div class="header-brand">
-                <img src="pochita.png" alt="Pockita Mascot" class="app-logo">
-                <div class="brand-text">
-                    <h1>Pockita</h1>
-                    <p class="tagline">Cutting Through Your Daily Expenses</p>
+            <!-- Penempatan Tombol Member Estetis di Pojok Kanan Atas -->
+            <div class="header-top">
+                <div class="header-brand">
+                    <img src="pochita.png" alt="Pockita Mascot" class="app-logo">
+                    <div class="brand-text">
+                        <h1>Pockita</h1>
+                        <p class="tagline">Cutting Through Your Daily Expenses</p>
+                    </div>
                 </div>
+                <button onclick="openMemberModal()" class="btn-member" title="Kartu Member">💳</button>
             </div>
             
-            <div class="header-actions">
-                <button onclick="openMemberModal()" class="btn-member" title="Kartu Member">💳</button>
-                <div class="month-picker-container">
-                    <input type="month" id="global-month-picker" class="borderless-picker" onchange="changeGlobalMonth()">
-                </div>
+            <div class="month-picker-container">
+                <input type="month" id="global-month-picker" class="borderless-picker" onchange="changeGlobalMonth()">
             </div>
         </header>
 
@@ -57,7 +58,7 @@
                 <button class="tab-btn" id="tab-transfer" onclick="switchForm('transfer')">⇄ Transfer</button>
             </div>
 
-            <!-- FORM PEMASUKAN -->
+            <!-- FORM PEMASUKAN YANG SEMPAT HILANG -->
             <div class="form-card" id="card-pemasukan">
                 <form id="form-pemasukan">
                     <div class="input-group">
@@ -90,7 +91,7 @@
                 </form>
             </div>
 
-            <!-- FORM PENGELUARAN -->
+            <!-- FORM PENGELUARAN YANG SEMPAT HILANG -->
             <div class="form-card" id="card-pengeluaran" style="display: none;">
                 <form id="form-pengeluaran">
                     <div class="input-group">
@@ -131,7 +132,7 @@
                 </form>
             </div>
 
-            <!-- FORM TRANSFER ANTAR DOMPET -->
+            <!-- FORM TRANSFER YANG SEMPAT HILANG -->
             <div class="form-card" id="card-transfer" style="display: none;">
                 <form id="form-transfer">
                     <p class="sub-info" style="margin-bottom: 15px;">Mutasi saldo tidak akan memengaruhi grafik analisis maupun total saldo utamamu.</p>
@@ -453,7 +454,7 @@
         </div>
     </div>
 
-    <!-- MODAL KARTU MEMBER (BARU) -->
+    <!-- MODAL KARTU MEMBER -->
     <div id="memberModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
