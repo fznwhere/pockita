@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pockita - Cutting Through Your Daily Expenses</title>
-    
     <link rel="icon" type="image/png" href="pochita.png">
-    
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -24,8 +22,11 @@
                 </div>
             </div>
             
-            <div class="month-picker-container">
-                <input type="month" id="global-month-picker" class="borderless-picker" onchange="changeGlobalMonth()">
+            <div class="header-actions">
+                <button onclick="openMemberModal()" class="btn-member" title="Kartu Member">💳</button>
+                <div class="month-picker-container">
+                    <input type="month" id="global-month-picker" class="borderless-picker" onchange="changeGlobalMonth()">
+                </div>
             </div>
         </header>
 
@@ -53,6 +54,7 @@
             <div class="tab-container">
                 <button class="tab-btn active" id="tab-pemasukan" onclick="switchForm('income')">+ Pemasukan</button>
                 <button class="tab-btn" id="tab-pengeluaran" onclick="switchForm('expense')">- Pengeluaran</button>
+                <button class="tab-btn" id="tab-transfer" onclick="switchForm('transfer')">⇄ Transfer</button>
             </div>
 
             <!-- FORM PEMASUKAN -->
@@ -79,7 +81,7 @@
                     </div>
                     <div class="input-group">
                         <label>
-                            Metode Pembayaran
+                            Simpan Ke Dompet
                             <a href="#" onclick="openMethodModal(event)" class="btn-manage-method">⚙️ Kelola</a>
                         </label>
                         <select id="in-metode" required></select>
@@ -120,12 +122,51 @@
                     </div>
                     <div class="input-group">
                         <label>
-                            Metode Pembayaran
+                            Ambil Dari Dompet
                             <a href="#" onclick="openMethodModal(event)" class="btn-manage-method">⚙️ Kelola</a>
                         </label>
                         <select id="out-metode" required></select>
                     </div>
                     <button type="submit" id="btn-submit-expense" class="btn btn-expense">Simpan Pengeluaran</button>
+                </form>
+            </div>
+
+            <!-- FORM TRANSFER ANTAR DOMPET -->
+            <div class="form-card" id="card-transfer" style="display: none;">
+                <form id="form-transfer">
+                    <p class="sub-info" style="margin-bottom: 15px;">Mutasi saldo tidak akan memengaruhi grafik analisis maupun total saldo utamamu.</p>
+                    <div class="input-group">
+                        <label>Jumlah Ditransfer</label>
+                        <input type="text" inputmode="numeric" id="tf-jumlah" class="format-uang" placeholder="Contoh: 50.000" required>
+                    </div>
+                    <div class="input-group-row">
+                        <div class="input-group">
+                            <label>Dari Dompet</label>
+                            <select id="tf-metode-dari" required></select>
+                        </div>
+                        <div class="input-group" style="display: flex; align-items: center; justify-content: center; max-width: 30px; margin-top: 15px;">
+                            <span style="font-size: 1.5rem; color: var(--text-muted);">➡</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Ke Dompet</label>
+                            <select id="tf-metode-ke" required></select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Catatan (Opsional)</label>
+                        <input type="text" id="tf-detail" placeholder="Cth: Pindah dana untuk COD...">
+                    </div>
+                    <div class="input-group-row">
+                        <div class="input-group">
+                            <label>Tanggal</label>
+                            <input type="date" id="tf-tanggal" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Jam</label>
+                            <input type="time" id="tf-waktu" required>
+                        </div>
+                    </div>
+                    <button type="submit" id="btn-submit-transfer" class="btn btn-transfer">Mutasi Saldo</button>
                 </form>
             </div>
 
@@ -153,7 +194,7 @@
             </div>
         </section>
 
-        <!-- ==================== HALAMAN 2: ANALISIS & PIE CHART ==================== -->
+        <!-- ==================== HALAMAN 2: ANALISIS ==================== -->
         <section id="page-analysis" class="page-section" style="display: none;">
             
             <div class="status-budget-card">
@@ -253,7 +294,6 @@
                     </div>
                     <div class="input-group">
                         <label>Kategori</label>
-                        <!-- Opsi Tabungan dihapus agar tidak tersentuh -->
                         <select id="recur-kategori" required>
                             <option value="kebutuhan">Kebutuhan</option>
                             <option value="keinginan">Keinginan</option>
@@ -265,7 +305,7 @@
                             <input type="text" id="recur-nama" placeholder="Spotify, Netflix..." required>
                         </div>
                         <div class="input-group">
-                            <label>Metode</label>
+                            <label>Ambil Dari Dompet</label>
                             <select id="recur-metode" required></select>
                         </div>
                     </div>
@@ -277,7 +317,6 @@
                 </div>
             </div>
 
-            <!-- FORM TARGET & TAGIHAN -->
             <div class="form-card">
                 <h3>Target & Tagihan</h3>
                 <p class="sub-info">Catat impian menabung atau cicilan tagihan belanjaanmu.</p>
@@ -288,7 +327,6 @@
                     </div>
                     <div class="input-group">
                         <label>Potong dari Alokasi Dana</label>
-                        <!-- Opsi Tabungan dihapus agar tidak tersentuh -->
                         <select id="goal-kategori" required>
                             <option value="kebutuhan">Kebutuhan</option>
                             <option value="keinginan">Keinginan</option>
@@ -308,18 +346,16 @@
                 </div>
             </div>
 
-            <!-- FORM HUTANG PIUTANG -->
             <div class="form-card">
                 <h3>Hutang & Piutang</h3>
                 <p class="sub-info">Catat arus uang pinjaman masuk atau keluar dari dompetmu.</p>
                 
                 <div class="tab-container" style="margin-top: 15px;">
-                    <!-- Posisi Ditukar: Hutang Kiri, Piutang Kanan -->
                     <button class="tab-btn active" id="tab-hutang-btn" onclick="switchDebtForm('hutang')">Hutang</button>
                     <button class="tab-btn" id="tab-piutang-btn" onclick="switchDebtForm('piutang')">Piutang</button>
                 </div>
 
-                <!-- FORM HUTANG (Uang Masuk Ke Kita) -->
+                <!-- HUTANG -->
                 <div id="card-hutang">
                     <form id="form-hutang">
                         <div class="input-group">
@@ -344,7 +380,7 @@
                     </form>
                 </div>
 
-                <!-- FORM PIUTANG (Uang Kita Keluar) -->
+                <!-- PIUTANG -->
                 <div id="card-piutang" style="display: none;">
                     <form id="form-piutang">
                         <div class="input-group">
@@ -353,7 +389,6 @@
                         </div>
                         <div class="input-group">
                             <label>Potong dari Alokasi Dana</label>
-                            <!-- Opsi Tabungan dihapus agar tidak tersentuh -->
                             <select id="piutang-kategori" required>
                                 <option value="kebutuhan">Kebutuhan</option>
                                 <option value="keinginan">Keinginan</option>
@@ -378,7 +413,6 @@
                 </div>
 
                 <div class="list-plan-container" style="margin-top:20px;">
-                    <!-- Judul diubah ke hitam dan teks dibersihkan -->
                     <h4 style="color: var(--text-main); margin-bottom: 5px;">Daftar Hutang:</h4>
                     <div id="list-hutang"></div>
 
@@ -389,14 +423,12 @@
 
         </section>
 
-        <!-- FOOTER APLIKASI MENTOK BAWAH -->
         <footer class="app-footer">
             <img src="footer.png" alt="Footer Background" class="footer-bg">
         </footer>
-
     </div>
 
-    <!-- MODAL KATALOG METODE PEMBAYARAN -->
+    <!-- MODAL METODE PEMBAYARAN -->
     <div id="methodModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -417,9 +449,34 @@
             <button class="btn btn-income" onclick="saveNewMethod()" style="margin-bottom: 20px;">Tambah Metode</button>
             
             <h4 style="font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Daftar Tersimpan</h4>
-            <ul id="modal-method-list" class="transaction-list" style="max-height: 150px; overflow-y: auto;">
-                <!-- List dirender via JS -->
-            </ul>
+            <ul id="modal-method-list" class="transaction-list" style="max-height: 150px; overflow-y: auto;"></ul>
+        </div>
+    </div>
+
+    <!-- MODAL KARTU MEMBER (BARU) -->
+    <div id="memberModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💳 Brankas Kartu Member</h3>
+                <span class="close-modal" onclick="closeMemberModal()">&times;</span>
+            </div>
+            <p class="sub-info" style="margin-bottom: 15px;">Simpan screenshot barcode Indogrosir, Alfamidi, atau kartu diskon lainnya di sini.</p>
+            
+            <div class="input-group">
+                <label>Nama Kartu / Toko</label>
+                <input type="text" id="new-member-name" placeholder="Misal: Alfamidi...">
+            </div>
+            <div class="input-group">
+                <label>Upload Barcode / QR Code</label>
+                <input type="file" id="new-member-file" accept="image/png, image/jpeg, image/jpg" style="padding: 10px;">
+                <p style="font-size: 0.7rem; color: var(--expense-red); margin-top: 4px; font-weight: bold;">*Wajib gunakan screenshot barcode yang sudah di-crop sekecil mungkin agar memori HP tidak penuh.</p>
+            </div>
+            <button class="btn btn-income" style="background-color: #2980B9;" onclick="saveMemberCard()" style="margin-bottom: 20px;">Simpan Kartu</button>
+            
+            <h4 style="font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 20px;">Daftar Kartu Tersimpan</h4>
+            <div id="member-card-list" class="member-grid" style="margin-top: 10px;">
+                <!-- Di-render via JS -->
+            </div>
         </div>
     </div>
 
