@@ -17,7 +17,7 @@
 body { background-color: var(--bg-app); color: var(--text-main); display: flex; justify-content: center; padding: 20px 10px 0px 10px; }
 .app-container { width: 100%; max-width: 500px; } 
 
-/* HEADER & TATA LETAK TOMBOL MEMBER ESTETIS */
+/* HEADER & TATA LETAK TOMBOL MEMBER ESTETIS (TRANSPARAN) */
 .app-header { margin-bottom: 25px; }
 .header-top { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; margin-bottom: 15px; }
 .header-brand { display: flex; align-items: center; gap: 15px; }
@@ -25,10 +25,11 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .brand-text h1 { color: var(--primary-orange); font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin-bottom: 2px;}
 .brand-text .tagline { color: var(--text-muted); font-size: 0.85rem; font-weight: 500;}
 
-/* Desain Premium Tombol Member di Pojok */
-.btn-member { background: var(--white); border: 1.5px solid var(--border-color); border-radius: 12px; width: 45px; height: 45px; font-size: 1.4rem; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s; padding: 0; overflow: hidden;}
-.btn-member:hover { border-color: var(--primary-orange); color: var(--primary-orange); }
-.btn-member:active { transform: scale(0.95); }
+/* Desain Tombol Member Transparan (Menyatu dengan BG) */
+.btn-member { background: transparent; border: none; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; padding: 0; overflow: visible; }
+.btn-member img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.1)); transition: 0.2s;}
+.btn-member:hover img { transform: scale(1.05); }
+.btn-member:active img { transform: scale(0.95); }
 
 .month-picker-container { padding: 0 10px;}
 .borderless-picker { padding: 4px 0; border: none; font-size: 1.1rem; font-weight: 700; color: var(--primary-orange); outline: none; background: transparent; cursor: pointer; width: 100%;}
