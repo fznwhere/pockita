@@ -2,7 +2,7 @@ let transactions = JSON.parse(localStorage.getItem('pockita_tx')) || [];
 let recurringTemplates = JSON.parse(localStorage.getItem('pockita_recur')) || [];
 let savingsGoals = JSON.parse(localStorage.getItem('pockita_goals')) || [];
 let debtsData = JSON.parse(localStorage.getItem('pockita_debts')) || [];
-let titipanData = JSON.parse(localStorage.getItem('pockita_titipan')) || []; // DATA BARU UNTUK TITIPAN
+let titipanData = JSON.parse(localStorage.getItem('pockita_titipan')) || []; 
 let recurringAppliedMonths = JSON.parse(localStorage.getItem('pockita_applied_months')) || [];
 let isBalanceHidden = JSON.parse(localStorage.getItem('pockita_hide_balance')) || false; 
 
@@ -142,31 +142,9 @@ function deleteMethod(name) {
     }
 }
 
-// ================= FITUR FOTO PROFIL & KARTU MEMBER =================
+// ================= FITUR KARTU MEMBER =================
 window.openMemberModal = function() { document.getElementById('memberModal').style.display = 'block'; renderMemberCards(); }
 window.closeMemberModal = function() { document.getElementById('memberModal').style.display = 'none'; }
-
-function loadProfilePic() {
-    const pic = localStorage.getItem('pockita_profile_pic');
-    const imgEl = document.getElementById('profile-icon-img');
-    const emojiEl = document.getElementById('profile-icon-emoji');
-    if(pic) {
-        imgEl.src = pic; imgEl.style.display = 'block'; emojiEl.style.display = 'none';
-    } else {
-        imgEl.style.display = 'none'; emojiEl.style.display = 'block';
-    }
-}
-
-window.saveProfilePic = function(e) {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-        localStorage.setItem('pockita_profile_pic', evt.target.result);
-        loadProfilePic();
-    };
-    reader.readAsDataURL(file);
-}
 
 function saveMemberCard() {
     const nameInput = document.getElementById('new-member-name');
@@ -221,6 +199,110 @@ function renderMemberCards() {
             </div>`;
         });
     }
+}
+
+// ================= FITUR TITIPAN (BARU) =================
+// FUNGSI INI AKAN MENYELESAIKAN BUG DAFTAR TITIPAN TIDAK MUNCUL
+document.getElementById('form-titipan').addEventListener('submit', function(e){
+    e.preventDefault();
+    const title = document.getElementById('titipan-judul').value;
+    const modal = parseUang(document.getElementById('titipan-modal').value);
+    const date = document.getElementById('titipan-tanggal').value; 
+
+    if (modal <= 0) return;
+    
+    titipanData.push({ id: Date.now(), title: title, modal: modal, date: date, items: [] });
+    localStorage.setItem('pockita_titipan', JSON.stringify(titipanData));
+    this.reset(); renderApp();
+});
+
+window.toggleTitipan = function(id) {
+    let el = document.getElementById('titipan-content-' + id);
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+window.tambahItemTitipan = function(e, id) {
+    e.preventDefault();
+    let nameInput = document.getElementById(`titipan-item-name-${id}`);
+    let priceInput = document.getElementById(`titipan-item-price-${id}`);
+    let name = nameInput.value;
+    let price = parseUang(priceInput.value);
+    
+    let session = titipanData.find(t => t.id === id);
+    if(session && price > 0) {
+        session.items.push({ name, price });
+        localStorage.setItem('pockita_titipan', JSON.stringify(titipanData));
+        renderApp();
+        setTimeout(() => { document.getElementById(`titipan-content-${id}`).style.display = 'block'; }, 50);
+    }
+}
+
+window.hapusItemTitipan = function(id, index) {
+    let session = titipanData.find(t => t.id === id);
+    if(session) {
+        session.items.splice(index, 1);
+        localStorage.setItem('pockita_titipan', JSON.stringify(titipanData));
+        renderApp();
+        setTimeout(() => { document.getElementById(`titipan-content-${id}`).style.display = 'block'; }, 50);
+    }
+}
+
+window.hapusTitipan = function(id) {
+    if(confirm("Hapus seluruh riwayat belanja titipan ini?")) {
+        titipanData = titipanData.filter(t => t.id !== id);
+        localStorage.setItem('pockita_titipan', JSON.stringify(titipanData));
+        renderApp();
+    }
+}
+
+function renderTitipan() {
+    const container = document.getElementById('list-titipan');
+    if(!container) return;
+    container.innerHTML = '';
+    if (titipanData.length === 0) {
+        container.innerHTML = `<div class="empty-state" style="padding: 10px 0;"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" style="width:40px;height:40px;" alt="Kosong">Belum ada riwayat uang titipan belanja.</div>`;
+        return;
+    }
+
+    titipanData.slice().reverse().forEach(t => {
+        let terpakai = t.items.reduce((sum, item) => sum + item.price, 0);
+        let sisa = t.modal - terpakai;
+        
+        let itemsHtml = '';
+        t.items.forEach((item, index) => {
+            itemsHtml += `
+                <li class="titipan-item">
+                    <span>${item.name}</span> 
+                    <span>Rp ${formatRupiah(item.price)} <button style="background:transparent;border:none;color:var(--expense-red);margin-left:5px;cursor:pointer;" onclick="hapusItemTitipan(${t.id}, ${index})">✖</button></span>
+                </li>`;
+        });
+
+        if (itemsHtml === '') itemsHtml = `<li style="text-align:center; font-size:0.8rem; color:var(--text-muted); padding: 5px 0;">Belum ada barang dibeli.</li>`;
+
+        let formattedDate = new Date(t.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        container.innerHTML += `
+        <div class="person-group" style="border-color: #9b59b6;">
+            <button class="person-header" onclick="toggleTitipan(${t.id})" style="background: #FDF4FF; color: #9b59b6;">
+                <span>🛒 ${t.title} <small style="font-weight:normal; color:var(--text-muted); display:block; margin-top:2px;">📅 ${formattedDate}</small></span>
+                <span style="text-align:right;">Sisa: Rp ${formatRupiah(sisa)} ▼</span>
+            </button>
+            <div class="person-content" id="titipan-content-${t.id}">
+                <div class="titipan-summary">
+                    <div>Modal: <br><strong>Rp ${formatRupiah(t.modal)}</strong></div>
+                    <div>Terpakai: <br><strong style="color:var(--expense-red)">Rp ${formatRupiah(terpakai)}</strong></div>
+                    <div>Sisa: <br><strong style="color:var(--income-green)">Rp ${formatRupiah(sisa)}</strong></div>
+                </div>
+                <ul class="titipan-item-list">${itemsHtml}</ul>
+                <form class="titipan-add-form" onsubmit="tambahItemTitipan(event, ${t.id})">
+                    <input type="text" id="titipan-item-name-${t.id}" placeholder="Nama barang..." required style="flex: 2;">
+                    <input type="text" inputmode="numeric" id="titipan-item-price-${t.id}" class="format-uang" placeholder="Harga Rp" required style="flex: 1.5;">
+                    <button type="submit">+</button>
+                </form>
+                <button class="btn-delete" style="width:100%; margin-top: 15px; border-radius: 8px; background: #FFF1F2; color: var(--expense-red); height: 40px;" onclick="hapusTitipan(${t.id})">Hapus Riwayat Ini</button>
+            </div>
+        </div>`;
+    });
 }
 // ======================================================
 
@@ -645,7 +727,6 @@ function renderBarChartKomparasi() {
     });
 }
 
-// LOGIKA INPUT FORM RENCANA
 document.getElementById('form-berulang').addEventListener('submit', function(e){
     e.preventDefault();
     const amount = parseUang(document.getElementById('recur-jumlah').value);
@@ -708,59 +789,6 @@ document.getElementById('form-hutang').addEventListener('submit', function(e){
     localStorage.setItem('pockita_tx', JSON.stringify(transactions));
     this.reset(); renderApp();
 });
-
-// LOGIKA INPUT TITIPAN BELANJA (BARU)
-document.getElementById('form-titipan').addEventListener('submit', function(e){
-    e.preventDefault();
-    const title = document.getElementById('titipan-judul').value;
-    const modal = parseUang(document.getElementById('titipan-modal').value);
-    const date = document.getElementById('titipan-tanggal').value; 
-
-    if (modal <= 0) return;
-    
-    titipanData.push({ id: Date.now(), title: title, modal: modal, date: date, items: [] });
-    localStorage.setItem('pockita_titipan', JSON.stringify(titipanData));
-    this.reset(); renderApp();
-});
-
-window.toggleTitipan = function(id) {
-    let el = document.getElementById('titipan-content-' + id);
-    el.style.display = el.style.display === 'block' ? 'none' : 'block';
-}
-
-window.tambahItemTitipan = function(e, id) {
-    e.preventDefault();
-    let nameInput = document.getElementById(`titipan-item-name-${id}`);
-    let priceInput = document.getElementById(`titipan-item-price-${id}`);
-    let name = nameInput.value;
-    let price = parseUang(priceInput.value);
-    
-    let session = titipanData.find(t => t.id === id);
-    if(session && price > 0) {
-        session.items.push({ name, price });
-        localStorage.setItem('pockita_titipan', JSON.stringify(titipanData));
-        renderApp();
-        setTimeout(() => { document.getElementById(`titipan-content-${id}`).style.display = 'block'; }, 50);
-    }
-}
-
-window.hapusItemTitipan = function(id, index) {
-    let session = titipanData.find(t => t.id === id);
-    if(session) {
-        session.items.splice(index, 1);
-        localStorage.setItem('pockita_titipan', JSON.stringify(titipanData));
-        renderApp();
-        setTimeout(() => { document.getElementById(`titipan-content-${id}`).style.display = 'block'; }, 50);
-    }
-}
-
-window.hapusTitipan = function(id) {
-    if(confirm("Hapus seluruh riwayat belanja titipan ini?")) {
-        titipanData = titipanData.filter(t => t.id !== id);
-        localStorage.setItem('pockita_titipan', JSON.stringify(titipanData));
-        renderApp();
-    }
-}
 
 function tambahTabunganGoal(id) {
     const inputEl = document.getElementById(`input-add-goal-${id}`);
@@ -923,56 +951,6 @@ function renderGroupedDebts(list, container, typeStr) {
     container.innerHTML = html;
 }
 
-function renderTitipan() {
-    const container = document.getElementById('list-titipan');
-    container.innerHTML = '';
-    if (titipanData.length === 0) {
-        container.innerHTML = `<div class="empty-state" style="padding: 10px 0;"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" style="width:40px;height:40px;" alt="Kosong">Belum ada riwayat uang titipan belanja.</div>`;
-        return;
-    }
-
-    titipanData.slice().reverse().forEach(t => {
-        let terpakai = t.items.reduce((sum, item) => sum + item.price, 0);
-        let sisa = t.modal - terpakai;
-        
-        let itemsHtml = '';
-        t.items.forEach((item, index) => {
-            itemsHtml += `
-                <li class="titipan-item">
-                    <span>${item.name}</span> 
-                    <span>Rp ${formatRupiah(item.price)} <button style="background:transparent;border:none;color:var(--expense-red);margin-left:5px;cursor:pointer;" onclick="hapusItemTitipan(${t.id}, ${index})">✖</button></span>
-                </li>`;
-        });
-
-        if (itemsHtml === '') itemsHtml = `<li style="text-align:center; font-size:0.8rem; color:var(--text-muted);">Belum ada barang dibeli.</li>`;
-
-        let formattedDate = new Date(t.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-
-        container.innerHTML += `
-        <div class="person-group" style="border-color: #9b59b6;">
-            <button class="person-header" onclick="toggleTitipan(${t.id})" style="background: #FDF4FF; color: #9b59b6;">
-                <span>🛒 ${t.title} <small style="font-weight:normal; color:var(--text-muted); display:block; margin-top:2px;">📅 ${formattedDate}</small></span>
-                <span style="text-align:right;">Sisa: Rp ${formatRupiah(sisa)} ▼</span>
-            </button>
-            <div class="person-content" id="titipan-content-${t.id}">
-                <div class="titipan-summary">
-                    <div>Dikasih: <br><strong>Rp ${formatRupiah(t.modal)}</strong></div>
-                    <div>Terpakai: <br><strong style="color:var(--expense-red)">Rp ${formatRupiah(terpakai)}</strong></div>
-                    <div>Sisa: <br><strong style="color:var(--income-green)">Rp ${formatRupiah(sisa)}</strong></div>
-                </div>
-                <ul class="titipan-item-list">${itemsHtml}</ul>
-                <form class="titipan-add-form" onsubmit="tambahItemTitipan(event, ${t.id})">
-                    <input type="text" id="titipan-item-name-${t.id}" placeholder="Nama barang..." required style="flex: 2;">
-                    <input type="text" inputmode="numeric" id="titipan-item-price-${t.id}" class="format-uang" placeholder="Harga Rp" required style="flex: 1.5;">
-                    <button type="submit">+</button>
-                </form>
-                <button class="btn-delete" style="width:100%; margin-top: 15px; border-radius: 8px; background: #FFF1F2; color: var(--expense-red); height: 40px;" onclick="hapusTitipan(${t.id})">Hapus Riwayat Ini</button>
-            </div>
-        </div>`;
-    });
-}
-
-
 function renderPlans() {
     const arrMethods = Object.keys(pockitaMethods);
     let selectHtml = `<select class="filter-dropdown" style="padding:8px; border-radius:10px;">`;
@@ -1040,7 +1018,7 @@ function renderPlans() {
     renderGroupedDebts(hutangList, containerHutang, 'hutang');
     renderGroupedDebts(piutangList, containerPiutang, 'piutang');
     
-    renderTitipan(); // Panggil render fitur baru Titipan
+    renderTitipan();
 
     attachMoneyFormat(); 
 }
@@ -1087,8 +1065,7 @@ function exportToExcel() {
     link.setAttribute("download", fileName); document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 
-// Inisialisasi awal
-loadProfilePic();
+// Hapus fungsi loadProfilePic() agar langsung load default fallback
 initMonthPicker();
 checkAndApplyRecurring();
 setDefaultDateTime();
