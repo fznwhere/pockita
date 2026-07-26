@@ -14,7 +14,6 @@
     <div class="app-container">
         <!-- HEADER -->
         <header class="app-header">
-            <!-- Penempatan Tombol Member Estetis di Pojok Kanan Atas -->
             <div class="header-top">
                 <div class="header-brand">
                     <img src="pochita.png" alt="Pockita Mascot" class="app-logo">
@@ -23,7 +22,11 @@
                         <p class="tagline">Cutting Through Your Daily Expenses</p>
                     </div>
                 </div>
-                <button onclick="openMemberModal()" class="btn-member" title="Kartu Member">💳</button>
+                <!-- Tombol Member / Profil yang bisa diganti fotonya -->
+                <button onclick="openMemberModal()" class="btn-member" title="Profil / Kartu Member">
+                    <img id="profile-icon-img" src="" alt="Profile" style="display:none; width:100%; height:100%; object-fit:cover;">
+                    <span id="profile-icon-emoji">💳</span>
+                </button>
             </div>
             
             <div class="month-picker-container">
@@ -58,7 +61,7 @@
                 <button class="tab-btn" id="tab-transfer" onclick="switchForm('transfer')">⇄ Transfer</button>
             </div>
 
-            <!-- FORM PEMASUKAN YANG SEMPAT HILANG -->
+            <!-- FORM PEMASUKAN -->
             <div class="form-card" id="card-pemasukan">
                 <form id="form-pemasukan">
                     <div class="input-group">
@@ -91,7 +94,7 @@
                 </form>
             </div>
 
-            <!-- FORM PENGELUARAN YANG SEMPAT HILANG -->
+            <!-- FORM PENGELUARAN -->
             <div class="form-card" id="card-pengeluaran" style="display: none;">
                 <form id="form-pengeluaran">
                     <div class="input-group">
@@ -132,7 +135,7 @@
                 </form>
             </div>
 
-            <!-- FORM TRANSFER YANG SEMPAT HILANG -->
+            <!-- FORM TRANSFER -->
             <div class="form-card" id="card-transfer" style="display: none;">
                 <form id="form-transfer">
                     <p class="sub-info" style="margin-bottom: 15px;">Mutasi saldo tidak akan memengaruhi grafik analisis maupun total saldo utamamu.</p>
@@ -197,57 +200,35 @@
 
         <!-- ==================== HALAMAN 2: ANALISIS ==================== -->
         <section id="page-analysis" class="page-section" style="display: none;">
-            
             <div class="status-budget-card">
                 <h3>Status Keuangan Bulan Ini</h3>
                 <p class="sub-info" style="text-align: center; margin-top: -10px; margin-bottom: 15px;">Tap kartu untuk melihat nominal maksimal</p>
-                
                 <div class="status-grid">
                     <div class="flip-card" onclick="this.classList.toggle('flipped')">
                         <div class="flip-card-inner">
                             <div class="flip-card-front" id="bg-kebutuhan">
                                 <img src="" alt="Status" class="status-image" id="img-kebutuhan" style="display: none;">
-                                <div class="card-content-wrapper">
-                                    <span class="lbl-top">Kebutuhan</span>
-                                    <span class="badge-bottom" id="badge-kebutuhan">0%</span>
-                                </div>
+                                <div class="card-content-wrapper"><span class="lbl-top">Kebutuhan</span><span class="badge-bottom" id="badge-kebutuhan">0%</span></div>
                             </div>
-                            <div class="flip-card-back">
-                                <span class="lbl-back">Batas Maks:</span>
-                                <span class="nominal-back" id="max-kebutuhan">0K</span>
-                            </div>
+                            <div class="flip-card-back"><span class="lbl-back">Batas Maks:</span><span class="nominal-back" id="max-kebutuhan">0K</span></div>
                         </div>
                     </div>
-
                     <div class="flip-card" onclick="this.classList.toggle('flipped')">
                         <div class="flip-card-inner">
                             <div class="flip-card-front" id="bg-keinginan">
                                 <img src="" alt="Status" class="status-image" id="img-keinginan" style="display: none;">
-                                <div class="card-content-wrapper">
-                                    <span class="lbl-top">Keinginan</span>
-                                    <span class="badge-bottom" id="badge-keinginan">0%</span>
-                                </div>
+                                <div class="card-content-wrapper"><span class="lbl-top">Keinginan</span><span class="badge-bottom" id="badge-keinginan">0%</span></div>
                             </div>
-                            <div class="flip-card-back">
-                                <span class="lbl-back">Batas Maks:</span>
-                                <span class="nominal-back" id="max-keinginan">0K</span>
-                            </div>
+                            <div class="flip-card-back"><span class="lbl-back">Batas Maks:</span><span class="nominal-back" id="max-keinginan">0K</span></div>
                         </div>
                     </div>
-
                     <div class="flip-card" onclick="this.classList.toggle('flipped')">
                         <div class="flip-card-inner">
                             <div class="flip-card-front" id="bg-tabungan">
                                 <img src="" alt="Status" class="status-image" id="img-tabungan" style="display: none;">
-                                <div class="card-content-wrapper">
-                                    <span class="lbl-top">Tabungan</span>
-                                    <span class="badge-bottom" id="badge-tabungan">0%</span>
-                                </div>
+                                <div class="card-content-wrapper"><span class="lbl-top">Tabungan</span><span class="badge-bottom" id="badge-tabungan">0%</span></div>
                             </div>
-                            <div class="flip-card-back">
-                                <span class="lbl-back">Batas Maks:</span>
-                                <span class="nominal-back" id="max-tabungan">0K</span>
-                            </div>
+                            <div class="flip-card-back"><span class="lbl-back">Batas Maks:</span><span class="nominal-back" id="max-tabungan">0K</span></div>
                         </div>
                     </div>
                 </div>
@@ -256,29 +237,20 @@
             <div class="charts-card">
                 <div class="chart-wrapper">
                     <h4>Target Porsi Ideal 50/30/20</h4>
-                    <div id="empty-target-chart" class="chart-empty-state" style="display: none;">
-                        <img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Empty">
-                        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Belum ada Pemasukan Bulan Ini</span>
-                    </div>
+                    <div id="empty-target-chart" class="chart-empty-state" style="display: none;"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Empty"><span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Belum ada Pemasukan Bulan Ini</span></div>
                     <canvas id="chartTarget"></canvas>
                 </div>
-                
                 <div class="chart-wrapper">
                     <h4>Persentase Penggunaan Realisasi</h4>
                     <p class="sub-info" style="margin-bottom: 8px;">Dari Total Pemasukan Bulan Ini</p>
-                    <div id="empty-realisasi-chart" class="chart-empty-state" style="display: none;">
-                        <img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Empty">
-                        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Belum ada Transaksi Bulan Ini</span>
-                    </div>
+                    <div id="empty-realisasi-chart" class="chart-empty-state" style="display: none;"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Empty"><span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Belum ada Transaksi Bulan Ini</span></div>
                     <canvas id="chartRealisasi"></canvas>
                 </div>
             </div>
 
             <div class="history-card">
                 <h3>Perbandingan Arus Kas Antar Bulan</h3>
-                <div class="bar-chart-container" style="margin-top: 15px; height: 260px;">
-                    <canvas id="chartKomparasi"></canvas>
-                </div>
+                <div class="bar-chart-container" style="margin-top: 15px; height: 260px;"><canvas id="chartKomparasi"></canvas></div>
             </div>
         </section>
 
@@ -347,6 +319,7 @@
                 </div>
             </div>
 
+            <!-- FORM HUTANG PIUTANG -->
             <div class="form-card">
                 <h3>Hutang & Piutang</h3>
                 <p class="sub-info">Catat arus uang pinjaman masuk atau keluar dari dompetmu.</p>
@@ -422,6 +395,34 @@
                 </div>
             </div>
 
+            <!-- FITUR BARU: CATATAN UANG SEMENTARA (TITIPAN) -->
+            <div class="form-card">
+                <h3>Uang Titipan / Belanja</h3>
+                <p class="sub-info">Catat khusus rincian belanjaan dan sisa kembalian dari uang titipan tanpa mengganggu saldo utamamu.</p>
+                <form id="form-titipan" style="margin-top:15px;">
+                    <div class="input-group">
+                        <label>Judul Titipan Belanja</label>
+                        <input type="text" id="titipan-judul" placeholder="Cth: Uang belanja sayur dari Kakak..." required>
+                    </div>
+                    <div class="input-group-row">
+                        <div class="input-group">
+                            <label>Dikasih Modal Uang Rp</label>
+                            <input type="text" inputmode="numeric" id="titipan-modal" class="format-uang" placeholder="Contoh: 150.000" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Tanggal Diterima</label>
+                            <input type="date" id="titipan-tanggal" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-income" style="background-color: #9b59b6">Buat Sesi Belanja</button>
+                </form>
+                
+                <div class="list-plan-container" style="margin-top:20px;">
+                    <h4 style="color: var(--text-main); margin-bottom: 5px;">Riwayat Uang Titipan:</h4>
+                    <div id="list-titipan"></div>
+                </div>
+            </div>
+
         </section>
 
         <footer class="app-footer">
@@ -454,13 +455,21 @@
         </div>
     </div>
 
-    <!-- MODAL KARTU MEMBER -->
+    <!-- MODAL KARTU MEMBER / FOTO PROFIL -->
     <div id="memberModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>💳 Brankas Kartu Member</h3>
                 <span class="close-modal" onclick="closeMemberModal()">&times;</span>
             </div>
+            
+            <!-- Pengaturan Foto Profil -->
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px;">
+                <div style="font-size: 0.9rem; font-weight: 600;">Ganti Ikon Menjadi Fotomu</div>
+                <label for="profile-pic-upload" style="background: var(--primary-orange); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: 0.2s;">Upload Foto</label>
+                <input type="file" id="profile-pic-upload" accept="image/png, image/jpeg, image/jpg" style="display:none;" onchange="saveProfilePic(event)">
+            </div>
+
             <p class="sub-info" style="margin-bottom: 15px;">Simpan screenshot barcode Indogrosir, Alfamidi, atau kartu diskon lainnya di sini.</p>
             
             <div class="input-group">
