@@ -26,7 +26,7 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .brand-text .tagline { color: var(--text-muted); font-size: 0.85rem; font-weight: 500;}
 
 /* Desain Premium Tombol Member di Pojok */
-.btn-member { background: var(--white); border: 1.5px solid var(--border-color); border-radius: 12px; width: 45px; height: 45px; font-size: 1.4rem; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s; }
+.btn-member { background: var(--white); border: 1.5px solid var(--border-color); border-radius: 12px; width: 45px; height: 45px; font-size: 1.4rem; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s; padding: 0; overflow: hidden;}
 .btn-member:hover { border-color: var(--primary-orange); color: var(--primary-orange); }
 .btn-member:active { transform: scale(0.95); }
 
@@ -176,6 +176,19 @@ body { background-color: var(--bg-app); color: var(--text-main); display: flex; 
 .goal-actions select { padding: 8px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--white); font-weight:600;}
 .btn-add-goal { background-color: var(--primary-orange); border: none; color: white; padding: 6px 12px; font-size: 0.8rem; border-radius: 10px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(232, 93, 4, 0.2);}
 .piutang-note { font-size: 0.8rem; color: var(--text-muted); background: #FFF2EC; padding: 8px 12px; border-radius: 10px; margin-bottom: 10px; display: inline-block;}
+
+/* UANG TITIPAN SPESIFIK CSS */
+.titipan-summary { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; background: #F8F9FA; padding: 10px; border-radius: 10px;}
+.titipan-summary div { text-align: center; flex: 1; }
+.titipan-summary strong { display: block; color: var(--text-main); font-size: 0.95rem; margin-top: 4px;}
+
+.titipan-item-list { list-style: none; margin-bottom: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;}
+.titipan-item { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid #f1f1f1;}
+
+.titipan-add-form { display: flex; gap: 8px; margin-top: 10px; }
+.titipan-add-form input { padding: 8px 10px; font-size: 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); outline: none;}
+.titipan-add-form input:focus { border-color: #9b59b6; }
+.titipan-add-form button { background: #9b59b6; color: white; border: none; border-radius: 8px; padding: 0 14px; font-weight: bold; cursor:pointer;}
 
 /* Modal & Kartu Member */
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(26, 26, 36, 0.6); backdrop-filter: blur(3px); }
