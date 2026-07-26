@@ -22,10 +22,10 @@
                         <p class="tagline">Cutting Through Your Daily Expenses</p>
                     </div>
                 </div>
-                <!-- Tombol Member / Profil yang bisa diganti fotonya -->
+                <!-- Tombol Profil Hardcoded: Akan otomatis memuat 'profilku.png' dari GitHub -->
                 <button onclick="openMemberModal()" class="btn-member" title="Profil / Kartu Member">
-                    <img id="profile-icon-img" src="" alt="Profile" style="display:none; width:100%; height:100%; object-fit:cover;">
-                    <span id="profile-icon-emoji">💳</span>
+                    <img src="profilku.png" alt="Profile" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none; font-size:1.5rem;">💳</span>
                 </button>
             </div>
             
@@ -61,7 +61,6 @@
                 <button class="tab-btn" id="tab-transfer" onclick="switchForm('transfer')">⇄ Transfer</button>
             </div>
 
-            <!-- FORM PEMASUKAN -->
             <div class="form-card" id="card-pemasukan">
                 <form id="form-pemasukan">
                     <div class="input-group">
@@ -94,7 +93,6 @@
                 </form>
             </div>
 
-            <!-- FORM PENGELUARAN -->
             <div class="form-card" id="card-pengeluaran" style="display: none;">
                 <form id="form-pengeluaran">
                     <div class="input-group">
@@ -135,7 +133,6 @@
                 </form>
             </div>
 
-            <!-- FORM TRANSFER -->
             <div class="form-card" id="card-transfer" style="display: none;">
                 <form id="form-transfer">
                     <p class="sub-info" style="margin-bottom: 15px;">Mutasi saldo tidak akan memengaruhi grafik analisis maupun total saldo utamamu.</p>
@@ -174,7 +171,6 @@
                 </form>
             </div>
 
-            <!-- RIWAYAT -->
             <div class="history-card">
                 <div class="history-header">
                     <h3>Riwayat Transaksi</h3>
@@ -319,7 +315,6 @@
                 </div>
             </div>
 
-            <!-- FORM HUTANG PIUTANG -->
             <div class="form-card">
                 <h3>Hutang & Piutang</h3>
                 <p class="sub-info">Catat arus uang pinjaman masuk atau keluar dari dompetmu.</p>
@@ -329,7 +324,6 @@
                     <button class="tab-btn" id="tab-piutang-btn" onclick="switchDebtForm('piutang')">Piutang</button>
                 </div>
 
-                <!-- HUTANG -->
                 <div id="card-hutang">
                     <form id="form-hutang">
                         <div class="input-group">
@@ -354,7 +348,6 @@
                     </form>
                 </div>
 
-                <!-- PIUTANG -->
                 <div id="card-piutang" style="display: none;">
                     <form id="form-piutang">
                         <div class="input-group">
@@ -395,7 +388,7 @@
                 </div>
             </div>
 
-            <!-- FITUR BARU: CATATAN UANG SEMENTARA (TITIPAN) -->
+            <!-- FITUR CATATAN UANG SEMENTARA (TITIPAN) -->
             <div class="form-card">
                 <h3>Uang Titipan / Belanja</h3>
                 <p class="sub-info">Catat khusus rincian belanjaan dan sisa kembalian dari uang titipan tanpa mengganggu saldo utamamu.</p>
@@ -455,7 +448,7 @@
         </div>
     </div>
 
-    <!-- MODAL KARTU MEMBER / FOTO PROFIL -->
+    <!-- MODAL KARTU MEMBER -->
     <div id="memberModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -463,13 +456,6 @@
                 <span class="close-modal" onclick="closeMemberModal()">&times;</span>
             </div>
             
-            <!-- Pengaturan Foto Profil -->
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px;">
-                <div style="font-size: 0.9rem; font-weight: 600;">Ganti Ikon Menjadi Fotomu</div>
-                <label for="profile-pic-upload" style="background: var(--primary-orange); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: 0.2s;">Upload Foto</label>
-                <input type="file" id="profile-pic-upload" accept="image/png, image/jpeg, image/jpg" style="display:none;" onchange="saveProfilePic(event)">
-            </div>
-
             <p class="sub-info" style="margin-bottom: 15px;">Simpan screenshot barcode Indogrosir, Alfamidi, atau kartu diskon lainnya di sini.</p>
             
             <div class="input-group">
