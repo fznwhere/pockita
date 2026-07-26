@@ -142,7 +142,6 @@ function deleteMethod(name) {
     }
 }
 
-// ================= FITUR KARTU MEMBER =================
 window.openMemberModal = function() { document.getElementById('memberModal').style.display = 'block'; renderMemberCards(); }
 window.closeMemberModal = function() { document.getElementById('memberModal').style.display = 'none'; }
 
@@ -201,8 +200,7 @@ function renderMemberCards() {
     }
 }
 
-// ================= FITUR TITIPAN (BARU) =================
-// FUNGSI INI AKAN MENYELESAIKAN BUG DAFTAR TITIPAN TIDAK MUNCUL
+// LOGIKA INPUT FORM RENCANA TITIPAN
 document.getElementById('form-titipan').addEventListener('submit', function(e){
     e.preventDefault();
     const title = document.getElementById('titipan-judul').value;
@@ -248,7 +246,7 @@ window.hapusItemTitipan = function(id, index) {
 }
 
 window.hapusTitipan = function(id) {
-    if(confirm("Hapus seluruh riwayat belanja titipan ini?")) {
+    if(confirm("Hapus seluruh riwayat titipan ini?")) {
         titipanData = titipanData.filter(t => t.id !== id);
         localStorage.setItem('pockita_titipan', JSON.stringify(titipanData));
         renderApp();
@@ -260,7 +258,7 @@ function renderTitipan() {
     if(!container) return;
     container.innerHTML = '';
     if (titipanData.length === 0) {
-        container.innerHTML = `<div class="empty-state" style="padding: 10px 0;"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" style="width:40px;height:40px;" alt="Kosong">Belum ada riwayat uang titipan belanja.</div>`;
+        container.innerHTML = `<div class="empty-state" style="padding: 10px 0;"><img src="pochita-sleep.png" class="empty-state-img empty-neon-orange" style="width:40px;height:40px;" alt="Kosong">Belum ada riwayat titipan.</div>`;
         return;
     }
 
@@ -277,7 +275,7 @@ function renderTitipan() {
                 </li>`;
         });
 
-        if (itemsHtml === '') itemsHtml = `<li style="text-align:center; font-size:0.8rem; color:var(--text-muted); padding: 5px 0;">Belum ada barang dibeli.</li>`;
+        if (itemsHtml === '') itemsHtml = `<li style="text-align:center; font-size:0.8rem; color:var(--text-muted); padding: 5px 0;">Belum ada barang ditambahkan.</li>`;
 
         let formattedDate = new Date(t.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -304,7 +302,6 @@ function renderTitipan() {
         </div>`;
     });
 }
-// ======================================================
 
 function checkAndApplyRecurring() {
     const realMonth = new Date().toISOString().slice(0, 7); 
@@ -1018,7 +1015,7 @@ function renderPlans() {
     renderGroupedDebts(hutangList, containerHutang, 'hutang');
     renderGroupedDebts(piutangList, containerPiutang, 'piutang');
     
-    renderTitipan();
+    renderTitipan(); 
 
     attachMoneyFormat(); 
 }
@@ -1065,7 +1062,6 @@ function exportToExcel() {
     link.setAttribute("download", fileName); document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 
-// Hapus fungsi loadProfilePic() agar langsung load default fallback
 initMonthPicker();
 checkAndApplyRecurring();
 setDefaultDateTime();
