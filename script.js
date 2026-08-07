@@ -334,6 +334,7 @@ function renderApp() {
     const activeMonth = getSelectedMonth();
     const transactionContainer = document.getElementById('daftar-transaksi');
     const filterMetode = document.getElementById('filter-metode');
+    const filterTipe = document.getElementById('filter-tipe') ? document.getElementById('filter-tipe').value : 'Utama';
     
     transactionContainer.innerHTML = '';
     let grandTotalSaldo = 0; let balancesByMethod = {};
@@ -376,6 +377,13 @@ function renderApp() {
     updateDatalist('detail-list', savedDetails);
     populateSelectMethods(); 
 
+    // FILTER LOGIK TIPE RIWAYAT (Utama vs Mutasi vs dll)
+    if (filterTipe === 'Utama') {
+        displayTransactions = displayTransactions.filter(tx => tx.type !== 'transfer');
+    } else {
+        displayTransactions = displayTransactions.filter(tx => tx.type === filterTipe);
+    }
+
     const currentFilter = filterMetode.value; 
     filterMetode.innerHTML = '<option value="Semua">Semua Dompet</option>';
     Object.keys(pockitaMethods).forEach(method => {
@@ -388,7 +396,7 @@ function renderApp() {
     }
 
     if (displayTransactions.length === 0) {
-        transactionContainer.innerHTML = `<div class="empty-state"><img src="img/pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Kosong">Tidak ada transaksi yang cocok.</div>`;
+        transactionContainer.innerHTML = `<div class="empty-state"><img src="img/pochita-sleep.png" class="empty-state-img empty-neon-orange" alt="Kosong">Tidak ada riwayat transaksi di kategori ini.</div>`;
     } else {
         const groupedTx = {};
         displayTransactions.forEach(tx => {
@@ -455,7 +463,6 @@ function renderApp() {
 
                     let catName = (tx.category && typeof tx.category === 'string') ? tx.category.toLowerCase() : "umum";
                     
-                    // WARNA KATEGORI SPESIAL BIAYA ADMIN
                     let catColorClass = 'pill-outline-kebutuhan';
                     if (catName === 'keinginan') catColorClass = 'pill-outline-keinginan';
                     else if (catName === 'tabungan') catColorClass = 'pill-outline-tabungan';
@@ -547,7 +554,7 @@ function editTransaksi(id) {
         document.getElementById('tf-waktu').value = tx.time;
         if(document.getElementById('tf-admin')) {
             document.getElementById('tf-admin').value = '';
-            document.getElementById('tf-admin').disabled = true; // Disabled saat edit agar tidak rancu dengan data terpisah
+            document.getElementById('tf-admin').disabled = true;
         }
         document.getElementById('btn-submit-transfer').innerText = "Update Mutasi ✓";
         document.getElementById('btn-submit-transfer').style.backgroundColor = "var(--secondary-orange)";
@@ -565,7 +572,6 @@ function resetFormButtons() {
     editingTxId = null;
 }
 
-// LOGIKA CERDAS BIAYA ADMIN MUTASI TERCATAT TERPISAH
 function simpanTransaksi(type, idAmount, idDesc, idDate, idTime, idMethod, idKategori = null, idMethodTo = null, idCatatan = null, idAdmin = null) {
     const amount = parseUang(document.getElementById(idAmount).value);
     const desc = idDesc && document.getElementById(idDesc) ? document.getElementById(idDesc).value : ''; 
@@ -600,13 +606,13 @@ function simpanTransaksi(type, idAmount, idDesc, idDate, idTime, idMethod, idKat
         const newTxId = Date.now();
         transactions.push({ id: newTxId, type, amount, desc, date, time, method, methodTo, category, catatan: catatan });
         
-        // JIKA ADA BIAYA ADMIN SAAT MUTASI, SISTEM OTOMATIS BUAT 1 PENGELUARAN BARU
+        // PEMECAHAN LOGIKA: BIAYA ADMIN OTOMATIS JADI PENGELUARAN TERSENDIRI
         if (type === 'transfer' && admin > 0) {
             transactions.push({ 
                 id: newTxId + 1, 
                 type: 'expense', 
                 amount: admin, 
-                desc: `Biaya Admin Mutasi: ${method} ke ${methodTo}`, 
+                desc: `${method} ke ${methodTo}`, 
                 date: date, 
                 time: time, 
                 method: method, 
@@ -644,7 +650,7 @@ function renderCharts() {
     monthlyTx.filter(tx => tx.type === 'expense').forEach(tx => {
         const cat = (tx.category && typeof tx.category === 'string') ? tx.category.toLowerCase() : 'kebutuhan';
         if (pengeluaranAktual.hasOwnProperty(cat)) { pengeluaranAktual[cat] += tx.amount; } 
-        else if (cat === 'biaya admin') { pengeluaranAktual.biayaadmin += tx.amount; } // Tergabung khusus sementara
+        else if (cat === 'biaya admin') { pengeluaranAktual.biayaadmin += tx.amount; } 
         else { pengeluaranAktual.kebutuhan += tx.amount; }
     });
 
@@ -678,7 +684,6 @@ function renderCharts() {
         let totalTerpakai = pengeluaranAktual.kebutuhan + pengeluaranAktual.keinginan + pengeluaranAktual.tabungan + pengeluaranAktual.biayaadmin;
         let sisaPemasukan = totalPemasukanBulanIni - totalTerpakai;
         
-        // Data chart disesuaikan dengan realita Admin Fee
         let labelChart2 = ['Kebutuhan', 'Keinginan', 'Tabungan'];
         let dataChart2 = [pengeluaranAktual.kebutuhan + pengeluaranAktual.biayaadmin, pengeluaranAktual.keinginan, pengeluaranAktual.tabungan];
         let colorChart2 = ['#3498DB', '#F39C12', '#2ECC71'];
@@ -1078,8 +1083,21 @@ function exportToExcel() {
     else { const specificDate = document.getElementById('filter-hari').value; displayTx = transactions.filter(tx => tx.date === specificDate); }
     
     if (displayTx.length === 0) { alert("Tidak ada data untuk diekspor!"); return; }
+
+    const filterTipe = document.getElementById('filter-tipe') ? document.getElementById('filter-tipe').value : 'Utama';
+    const currentFilter = document.getElementById('filter-metode').value;
+
+    if (filterTipe === 'Utama') {
+        displayTx = displayTx.filter(tx => tx.type !== 'transfer');
+    } else {
+        displayTx = displayTx.filter(tx => tx.type === filterTipe);
+    }
+
+    if (currentFilter !== 'Semua') { 
+        displayTx = displayTx.filter(tx => tx.method === currentFilter || (tx.type === 'transfer' && tx.methodTo === currentFilter)); 
+    }
     
-    let csvContent = "data:text/csv;charset=utf-8,\uFEFFTanggal,Jam,Tipe,Kategori,Detail,Catatan Tambahan,Metode,Jumlah (Rp)\n";
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFFTanggal,Jam,Tipe,Kategori,Detail,Catatan,Metode,Jumlah (Rp)\n";
     displayTx.sort((a,b) => {
         const timeA = new Date((a.date||'') + 'T' + (a.time||'00:00')).getTime() || a.id;
         const timeB = new Date((b.date||'') + 'T' + (b.time||'00:00')).getTime() || b.id;
