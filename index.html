@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pockita - Cutting Through Your Daily Expenses</title>
-    <!-- Path gambar diarahkan ke folder img -->
     <link rel="icon" type="image/png" href="img/pochita.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
@@ -58,24 +57,22 @@
             <div class="tab-container">
                 <button class="tab-btn active" id="tab-pemasukan" onclick="switchForm('income')">+ Pemasukan</button>
                 <button class="tab-btn" id="tab-pengeluaran" onclick="switchForm('expense')">- Pengeluaran</button>
-                <button class="tab-btn" id="tab-transfer" onclick="switchForm('transfer')">⇄ Transfer</button>
+                <button class="tab-btn" id="tab-transfer" onclick="switchForm('transfer')">⇄ Mutasi</button>
             </div>
 
-            <!-- FORM PEMASUKAN -->
             <div class="form-card" id="card-pemasukan">
                 <form id="form-pemasukan">
                     <div class="input-group">
-                        <label>Jumlah Pemasukan</label>
+                        <label>Jumlah</label>
                         <input type="text" inputmode="numeric" id="in-jumlah" class="format-uang" placeholder="Contoh: 2.000.000" required>
                     </div>
                     <div class="input-group">
-                        <label>Sumber Pemasukan</label>
+                        <label>Sumber</label>
                         <input type="text" id="in-sumber" list="sumber-list" placeholder="Gaji, Ortu, Jualan..." required>
                         <datalist id="sumber-list"></datalist>
                     </div>
-                    <!-- KOLOM CATATAN BARU -->
                     <div class="input-group">
-                        <label>Catatan Tambahan (Opsional)</label>
+                        <label>Catatan Tambahan</label>
                         <input type="text" id="in-catatan" placeholder="Cth: Dikasih untuk ultah...">
                     </div>
                     <div class="input-group-row">
@@ -99,15 +96,14 @@
                 </form>
             </div>
 
-            <!-- FORM PENGELUARAN -->
             <div class="form-card" id="card-pengeluaran" style="display: none;">
                 <form id="form-pengeluaran">
                     <div class="input-group">
-                        <label>Jumlah Pengeluaran</label>
+                        <label>Jumlah</label>
                         <input type="text" inputmode="numeric" id="out-jumlah" class="format-uang" placeholder="Contoh: 15.000" required>
                     </div>
                     <div class="input-group">
-                        <label>Kategori Pengeluaran</label>
+                        <label>Kategori</label>
                         <select id="out-kategori" required>
                             <option value="kebutuhan">Kebutuhan</option>
                             <option value="keinginan">Keinginan</option>
@@ -115,14 +111,13 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Detail Item / Hal Apa</label>
+                        <label>Detail Keterangan</label>
                         <input type="text" id="out-detail" list="detail-list" placeholder="Beli akun game, Beras..." required>
                         <datalist id="detail-list"></datalist>
                     </div>
-                    <!-- KOLOM CATATAN BARU -->
                     <div class="input-group">
-                        <label>Catatan Tambahan (Opsional)</label>
-                        <input type="text" id="out-catatan" placeholder="Cth: Titipan teman / Varian rasa cokelat...">
+                        <label>Catatan Tambahan</label>
+                        <input type="text" id="out-catatan" placeholder="Cth: Titipan teman / Varian cokelat...">
                     </div>
                     <div class="input-group-row">
                         <div class="input-group">
@@ -145,12 +140,19 @@
                 </form>
             </div>
 
+            <!-- FORM MUTASI -->
             <div class="form-card" id="card-transfer" style="display: none;">
                 <form id="form-transfer">
-                    <p class="sub-info" style="margin-bottom: 15px;">Mutasi saldo tidak akan memengaruhi grafik analisis maupun total saldo utamamu.</p>
-                    <div class="input-group">
-                        <label>Jumlah Ditransfer</label>
-                        <input type="text" inputmode="numeric" id="tf-jumlah" class="format-uang" placeholder="Contoh: 50.000" required>
+                    <div class="input-group-row">
+                        <div class="input-group">
+                            <label>Jumlah Mutasi</label>
+                            <input type="text" inputmode="numeric" id="tf-jumlah" class="format-uang" placeholder="Cth: 50.000" required>
+                        </div>
+                        <!-- KOLOM BIAYA ADMIN -->
+                        <div class="input-group">
+                            <label>Biaya Admin</label>
+                            <input type="text" inputmode="numeric" id="tf-admin" class="format-uang" placeholder="Kosongkan jika gratis">
+                        </div>
                     </div>
                     <div class="input-group-row">
                         <div class="input-group">
@@ -166,8 +168,8 @@
                         </div>
                     </div>
                     <div class="input-group">
-                        <label>Catatan (Opsional)</label>
-                        <input type="text" id="tf-detail" placeholder="Cth: Pindah dana untuk COD...">
+                        <label>Catatan Tambahan</label>
+                        <input type="text" id="tf-catatan" placeholder="Cth: Pindah dana untuk COD...">
                     </div>
                     <div class="input-group-row">
                         <div class="input-group">
@@ -282,7 +284,7 @@
                     </div>
                     <div class="input-group-row">
                         <div class="input-group">
-                            <label>Nama Pengeluaran / Layanan</label>
+                            <label>Nama Layanan</label>
                             <input type="text" id="recur-nama" placeholder="Spotify, Netflix..." required>
                         </div>
                         <div class="input-group">
@@ -303,7 +305,7 @@
                 <p class="sub-info">Catat impian menabung atau cicilan tagihan belanjaanmu.</p>
                 <form id="form-goals" style="margin-top:15px;">
                     <div class="input-group">
-                        <label>Nama Target / Tagihan</label>
+                        <label>Nama Target</label>
                         <input type="text" id="goal-nama" placeholder="Beli Laptop, COD Sepatu..." required>
                     </div>
                     <div class="input-group">
@@ -315,7 +317,7 @@
                     </div>
                     <div class="input-group-row">
                         <div class="input-group">
-                            <label>Target Uang / Tagihan Rp</label>
+                            <label>Target Nominal</label>
                             <input type="text" inputmode="numeric" id="goal-target" class="format-uang" placeholder="Contoh: 10.000.000" required>
                         </div>
                     </div>
@@ -344,7 +346,7 @@
                         </div>
                         <div class="input-group-row">
                             <div class="input-group">
-                                <label>Nominal Rp</label>
+                                <label>Nominal</label>
                                 <input type="text" inputmode="numeric" id="hutang-jumlah" class="format-uang" placeholder="Contoh: 50.000" required>
                             </div>
                             <div class="input-group">
@@ -353,7 +355,7 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <label>Catatan Opsional</label>
+                            <label>Catatan</label>
                             <input type="text" id="hutang-catatan" placeholder="Cth: Janji ganti besok...">
                         </div>
                         <button type="submit" class="btn btn-income" style="background-color: var(--primary-orange)">Buat Catatan Hutang</button>
@@ -375,7 +377,7 @@
                         </div>
                         <div class="input-group-row">
                             <div class="input-group">
-                                <label>Nominal Rp</label>
+                                <label>Nominal</label>
                                 <input type="text" inputmode="numeric" id="piutang-jumlah" class="format-uang" placeholder="Contoh: 100.000" required>
                             </div>
                             <div class="input-group">
@@ -384,7 +386,7 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <label>Catatan Opsional</label>
+                            <label>Catatan</label>
                             <input type="text" id="piutang-catatan" placeholder="Cth: Lunas akhir bulan...">
                         </div>
                         <button type="submit" class="btn btn-income" style="background-color: var(--primary-orange)">Buat Catatan Piutang</button>
@@ -400,7 +402,7 @@
                 </div>
             </div>
 
-            <!-- FITUR CATATAN UANG SEMENTARA (TITIPAN) -->
+            <!-- FITUR TITIPAN -->
             <div class="form-card">
                 <h3>Uang Titipan</h3>
                 <p class="sub-info">Catat khusus rincian dan sisa kembalian dari uang titipan.</p>
