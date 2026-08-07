@@ -377,7 +377,7 @@ function renderApp() {
     updateDatalist('detail-list', savedDetails);
     populateSelectMethods(); 
 
-    // FILTER LOGIK TIPE RIWAYAT (Utama vs Mutasi vs dll)
+    // FILTER LOGIK TIPE RIWAYAT 
     if (filterTipe === 'Utama') {
         displayTransactions = displayTransactions.filter(tx => tx.type !== 'transfer');
     } else {
@@ -454,6 +454,11 @@ function renderApp() {
 
                     let cleanDesc = tx.desc.replace('Auto: ', '').replace('Target: ', '').replace('Memberi Piutang: ', '').replace('Terima Piutang: ', '').replace('Menerima Hutang: ', '').replace('Bayar Hutang: ', '');
                     
+                    // MEMBERSIHKAN DATA BIAYA ADMIN LAMA YANG TERLANJUR TERSIMPAN
+                    if (tx.category === 'biaya admin') {
+                        cleanDesc = cleanDesc.replace('Biaya Admin Mutasi: ', '').replace(' ke ', ' ➡ ');
+                    }
+
                     let pillExtra = '';
                     if (isAuto) pillExtra = `<span class="pill-outline pill-outline-auto">AUTO</span>`;
                     if (isTarget) pillExtra = `<span class="pill-outline pill-outline-target">TAGIHAN</span>`;
@@ -476,10 +481,7 @@ function renderApp() {
 
                     if (isTransfer) {
                         txColorClass = 'tx-transfer'; sign = '';
-                        cleanDesc = `Mutasi Ke ${tx.methodTo}`;
-                        if (currentFilter !== 'Semua' && tx.methodTo === currentFilter) {
-                            cleanDesc = `Mutasi Dari ${tx.method}`;
-                        }
+                        cleanDesc = `${tx.method} ➡ ${tx.methodTo}`;
                     }
 
                     let catatanUI = tx.catatan ? `<div class="tx-note">📝 ${tx.catatan}</div>` : '';
@@ -606,13 +608,12 @@ function simpanTransaksi(type, idAmount, idDesc, idDate, idTime, idMethod, idKat
         const newTxId = Date.now();
         transactions.push({ id: newTxId, type, amount, desc, date, time, method, methodTo, category, catatan: catatan });
         
-        // PEMECAHAN LOGIKA: BIAYA ADMIN OTOMATIS JADI PENGELUARAN TERSENDIRI
         if (type === 'transfer' && admin > 0) {
             transactions.push({ 
                 id: newTxId + 1, 
                 type: 'expense', 
                 amount: admin, 
-                desc: `${method} ke ${methodTo}`, 
+                desc: `${method} ➡ ${methodTo}`, 
                 date: date, 
                 time: time, 
                 method: method, 
@@ -1106,8 +1107,11 @@ function exportToExcel() {
         let tipe = tx.type === 'income' ? 'Pemasukan' : (tx.type === 'transfer' ? 'Mutasi' : 'Pengeluaran');
         let kat = tx.category ? tx.category.toUpperCase() : 'UMUM';
         let dtl = tx.desc.replace(/,/g, " ");
+        if (tx.category === 'biaya admin') {
+            dtl = dtl.replace('Biaya Admin Mutasi: ', '').replace(' ke ', ' ➡ ');
+        }
         let cttn = tx.catatan ? tx.catatan.replace(/,/g, " ") : "-";
-        let method = tx.type === 'transfer' ? `${tx.method} -> ${tx.methodTo}` : tx.method;
+        let method = tx.type === 'transfer' ? `${tx.method} ➡ ${tx.methodTo}` : tx.method;
         csvContent += `${tx.date},${tx.time},${tipe},${kat},${dtl},${cttn},${method},${tx.amount}\n`;
     });
     const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent));
