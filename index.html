@@ -60,6 +60,7 @@
                 <button class="tab-btn" id="tab-transfer" onclick="switchForm('transfer')">⇄ Mutasi</button>
             </div>
 
+            <!-- FORM PEMASUKAN -->
             <div class="form-card" id="card-pemasukan">
                 <form id="form-pemasukan">
                     <div class="input-group">
@@ -72,7 +73,7 @@
                         <datalist id="sumber-list"></datalist>
                     </div>
                     <div class="input-group">
-                        <label>Catatan Tambahan</label>
+                        <label>Catatan</label>
                         <input type="text" id="in-catatan" placeholder="Cth: Dikasih untuk ultah...">
                     </div>
                     <div class="input-group-row">
@@ -87,7 +88,7 @@
                     </div>
                     <div class="input-group">
                         <label>
-                            Simpan Ke Dompet
+                            Simpan Ke
                             <a href="#" onclick="openMethodModal(event)" class="btn-manage-method">⚙️ Kelola</a>
                         </label>
                         <select id="in-metode" required></select>
@@ -96,6 +97,7 @@
                 </form>
             </div>
 
+            <!-- FORM PENGELUARAN -->
             <div class="form-card" id="card-pengeluaran" style="display: none;">
                 <form id="form-pengeluaran">
                     <div class="input-group">
@@ -111,12 +113,12 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Detail Keterangan</label>
+                        <label>Keterangan</label>
                         <input type="text" id="out-detail" list="detail-list" placeholder="Beli akun game, Beras..." required>
                         <datalist id="detail-list"></datalist>
                     </div>
                     <div class="input-group">
-                        <label>Catatan Tambahan</label>
+                        <label>Catatan</label>
                         <input type="text" id="out-catatan" placeholder="Cth: Titipan teman / Varian cokelat...">
                     </div>
                     <div class="input-group-row">
@@ -131,7 +133,7 @@
                     </div>
                     <div class="input-group">
                         <label>
-                            Ambil Dari Dompet
+                            Ambil Dari
                             <a href="#" onclick="openMethodModal(event)" class="btn-manage-method">⚙️ Kelola</a>
                         </label>
                         <select id="out-metode" required></select>
@@ -143,9 +145,10 @@
             <!-- FORM MUTASI -->
             <div class="form-card" id="card-transfer" style="display: none;">
                 <form id="form-transfer">
+                    <p class="sub-info" style="margin-bottom: 15px;">Mutasi saldo tidak akan memengaruhi grafik analisis maupun total saldo utamamu.</p>
                     <div class="input-group-row">
                         <div class="input-group">
-                            <label>Jumlah Mutasi</label>
+                            <label>Jumlah</label>
                             <input type="text" inputmode="numeric" id="tf-jumlah" class="format-uang" placeholder="Cth: 50.000" required>
                         </div>
                         <!-- KOLOM BIAYA ADMIN -->
@@ -156,19 +159,19 @@
                     </div>
                     <div class="input-group-row">
                         <div class="input-group">
-                            <label>Dari Dompet</label>
+                            <label>Dari</label>
                             <select id="tf-metode-dari" required></select>
                         </div>
                         <div class="input-group" style="display: flex; align-items: center; justify-content: center; max-width: 30px; margin-top: 15px;">
                             <span style="font-size: 1.5rem; color: var(--text-muted);">➡</span>
                         </div>
                         <div class="input-group">
-                            <label>Ke Dompet</label>
+                            <label>Ke</label>
                             <select id="tf-metode-ke" required></select>
                         </div>
                     </div>
                     <div class="input-group">
-                        <label>Catatan Tambahan</label>
+                        <label>Catatan</label>
                         <input type="text" id="tf-catatan" placeholder="Cth: Pindah dana untuk COD...">
                     </div>
                     <div class="input-group-row">
@@ -185,11 +188,18 @@
                 </form>
             </div>
 
+            <!-- RIWAYAT -->
             <div class="history-card">
                 <div class="history-header">
                     <h3>Riwayat Transaksi</h3>
-                    <div class="history-actions">
+                    <div class="history-actions" style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
                         <button class="btn-export" onclick="exportToExcel()">📥 Excel</button>
+                        <select id="filter-tipe" class="filter-dropdown" onchange="renderApp()">
+                            <option value="Utama">Utama (Masuk & Keluar)</option>
+                            <option value="income">Pemasukan</option>
+                            <option value="expense">Pengeluaran</option>
+                            <option value="transfer">Mutasi</option>
+                        </select>
                         <select id="filter-metode" class="filter-dropdown" onchange="renderApp()">
                             <option value="Semua">Semua Dompet</option>
                         </select>
@@ -288,7 +298,7 @@
                             <input type="text" id="recur-nama" placeholder="Spotify, Netflix..." required>
                         </div>
                         <div class="input-group">
-                            <label>Ambil Dari Dompet</label>
+                            <label>Ambil Dari</label>
                             <select id="recur-metode" required></select>
                         </div>
                     </div>
@@ -309,7 +319,7 @@
                         <input type="text" id="goal-nama" placeholder="Beli Laptop, COD Sepatu..." required>
                     </div>
                     <div class="input-group">
-                        <label>Potong dari Alokasi Dana</label>
+                        <label>Kategori Dana</label>
                         <select id="goal-kategori" required>
                             <option value="kebutuhan">Kebutuhan</option>
                             <option value="keinginan">Keinginan</option>
@@ -350,7 +360,7 @@
                                 <input type="text" inputmode="numeric" id="hutang-jumlah" class="format-uang" placeholder="Contoh: 50.000" required>
                             </div>
                             <div class="input-group">
-                                <label>Simpan ke Dompet</label>
+                                <label>Simpan Ke</label>
                                 <select id="hutang-metode" required></select>
                             </div>
                         </div>
@@ -369,7 +379,7 @@
                             <input type="text" id="piutang-nama" placeholder="Si A pinjam uang..." required>
                         </div>
                         <div class="input-group">
-                            <label>Potong dari Alokasi Dana</label>
+                            <label>Kategori Dana</label>
                             <select id="piutang-kategori" required>
                                 <option value="kebutuhan">Kebutuhan</option>
                                 <option value="keinginan">Keinginan</option>
@@ -381,7 +391,7 @@
                                 <input type="text" inputmode="numeric" id="piutang-jumlah" class="format-uang" placeholder="Contoh: 100.000" required>
                             </div>
                             <div class="input-group">
-                                <label>Ambil dari Dompet</label>
+                                <label>Ambil Dari</label>
                                 <select id="piutang-metode" required></select>
                             </div>
                         </div>
