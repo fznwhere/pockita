@@ -151,7 +151,6 @@
                             <label>Jumlah</label>
                             <input type="text" inputmode="numeric" id="tf-jumlah" class="format-uang" placeholder="Cth: 50.000" required>
                         </div>
-                        <!-- KOLOM BIAYA ADMIN -->
                         <div class="input-group">
                             <label>Biaya Admin</label>
                             <input type="text" inputmode="numeric" id="tf-admin" class="format-uang" placeholder="Kosongkan jika gratis">
@@ -195,7 +194,7 @@
                     <div class="history-actions" style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
                         <button class="btn-export" onclick="exportToExcel()">📥 Excel</button>
                         <select id="filter-tipe" class="filter-dropdown" onchange="renderApp()">
-                            <option value="Utama">Utama (Masuk & Keluar)</option>
+                            <option value="Utama">Utama</option>
                             <option value="income">Pemasukan</option>
                             <option value="expense">Pengeluaran</option>
                             <option value="transfer">Mutasi</option>
