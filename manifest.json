@@ -8,12 +8,12 @@
   "description": "Progressive Web App Pockita, aplikasi pencatat keuangan yang personal dengan maskot Pochita.",
   "icons": [
     {
-      "src": "pochita.png",
+      "src": "img/pochita.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "pochita.png",
+      "src": "img/pochita.png",
       "sizes": "512x512",
       "type": "image/png"
     }
