@@ -102,7 +102,6 @@ function renderModalMethodList() {
     if(!list) return;
     list.innerHTML = '';
     for (let method in pockitaMethods) {
-        // PERUBAHAN KE img/
         const imgData = pockitaMethods[method] || `img/${method.toLowerCase().replace(/[^a-z0-9]/g, '')}.png`;
         list.innerHTML += `
             <li class="transaction-item" style="padding: 6px 0;">
@@ -201,7 +200,6 @@ function renderMemberCards() {
     }
 }
 
-// LOGIKA INPUT FORM RENCANA TITIPAN
 document.getElementById('form-titipan').addEventListener('submit', function(e){
     e.preventDefault();
     const title = document.getElementById('titipan-judul').value;
@@ -453,10 +451,15 @@ function renderApp() {
                     if (isTarget) pillExtra = `<span class="pill-outline pill-outline-target">TAGIHAN</span>`;
                     if (isPiutang) pillExtra = `<span class="pill-outline pill-outline-piutang">PIUTANG</span>`;
                     if (isHutang) pillExtra = `<span class="pill-outline pill-outline-hutang">HUTANG</span>`;
-                    if (isTransfer) pillExtra = `<span class="pill-outline pill-outline-transfer">⇄ TRANSFER</span>`;
+                    if (isTransfer) pillExtra = `<span class="pill-outline pill-outline-transfer">⇄ MUTASI</span>`;
 
                     let catName = (tx.category && typeof tx.category === 'string') ? tx.category.toLowerCase() : "umum";
-                    let catColorClass = catName === 'kebutuhan' ? 'pill-outline-kebutuhan' : (catName === 'keinginan' ? 'pill-outline-keinginan' : 'pill-outline-tabungan');
+                    
+                    // WARNA KATEGORI SPESIAL BIAYA ADMIN
+                    let catColorClass = 'pill-outline-kebutuhan';
+                    if (catName === 'keinginan') catColorClass = 'pill-outline-keinginan';
+                    else if (catName === 'tabungan') catColorClass = 'pill-outline-tabungan';
+                    else if (catName === 'biaya admin') catColorClass = 'pill-outline-admin';
                     
                     let pillKategori = tx.type === 'expense' && !isPiutang && !isHutang && !isTransfer ? `<span class="pill-outline ${catColorClass}">${catName.toUpperCase()}</span>` : '';
                     
@@ -466,13 +469,12 @@ function renderApp() {
 
                     if (isTransfer) {
                         txColorClass = 'tx-transfer'; sign = '';
-                        cleanDesc = `Ke ${tx.methodTo} ${tx.desc ? ' - '+tx.desc : ''}`;
+                        cleanDesc = `Mutasi Ke ${tx.methodTo}`;
                         if (currentFilter !== 'Semua' && tx.methodTo === currentFilter) {
-                            cleanDesc = `Dari ${tx.method} ${tx.desc ? ' - '+tx.desc : ''}`;
+                            cleanDesc = `Mutasi Dari ${tx.method}`;
                         }
                     }
-                    
-                    // UI CATATAN KECIL (JIKA ADA)
+
                     let catatanUI = tx.catatan ? `<div class="tx-note">📝 ${tx.catatan}</div>` : '';
 
                     const li = document.createElement('li');
@@ -540,9 +542,13 @@ function editTransaksi(id) {
         document.getElementById('tf-jumlah').value = formatRupiah(tx.amount);
         document.getElementById('tf-metode-dari').value = tx.method;
         document.getElementById('tf-metode-ke').value = tx.methodTo;
-        document.getElementById('tf-detail').value = tx.desc;
+        if(document.getElementById('tf-catatan')) document.getElementById('tf-catatan').value = tx.catatan || '';
         document.getElementById('tf-tanggal').value = tx.date;
         document.getElementById('tf-waktu').value = tx.time;
+        if(document.getElementById('tf-admin')) {
+            document.getElementById('tf-admin').value = '';
+            document.getElementById('tf-admin').disabled = true; // Disabled saat edit agar tidak rancu dengan data terpisah
+        }
         document.getElementById('btn-submit-transfer').innerText = "Update Mutasi ✓";
         document.getElementById('btn-submit-transfer').style.backgroundColor = "var(--secondary-orange)";
     }
@@ -555,18 +561,21 @@ function resetFormButtons() {
     document.getElementById('btn-submit-expense').style.backgroundColor = "var(--expense-red)";
     document.getElementById('btn-submit-transfer').innerText = "Mutasi Saldo";
     document.getElementById('btn-submit-transfer').style.backgroundColor = "#8492A6";
+    if(document.getElementById('tf-admin')) document.getElementById('tf-admin').disabled = false;
     editingTxId = null;
 }
 
-function simpanTransaksi(type, idAmount, idDesc, idDate, idTime, idMethod, idKategori = null, idMethodTo = null, idCatatan = null) {
+// LOGIKA CERDAS BIAYA ADMIN MUTASI TERCATAT TERPISAH
+function simpanTransaksi(type, idAmount, idDesc, idDate, idTime, idMethod, idKategori = null, idMethodTo = null, idCatatan = null, idAdmin = null) {
     const amount = parseUang(document.getElementById(idAmount).value);
-    const desc = idDesc ? document.getElementById(idDesc).value : ''; 
+    const desc = idDesc && document.getElementById(idDesc) ? document.getElementById(idDesc).value : ''; 
     const date = document.getElementById(idDate).value;
     const time = document.getElementById(idTime).value;
     const method = document.getElementById(idMethod).value;
     const category = idKategori ? document.getElementById(idKategori).value : null;
     const methodTo = idMethodTo ? document.getElementById(idMethodTo).value : null;
     const catatan = idCatatan && document.getElementById(idCatatan) ? document.getElementById(idCatatan).value : '';
+    const admin = idAdmin && document.getElementById(idAdmin) ? parseUang(document.getElementById(idAdmin).value) : 0;
 
     if (amount <= 0) return;
     if (type === 'transfer' && method === methodTo) return alert("Pilih dompet tujuan yang berbeda!");
@@ -588,7 +597,23 @@ function simpanTransaksi(type, idAmount, idDesc, idDate, idTime, idMethod, idKat
         transactions[idx] = { id: editingTxId, type, amount, desc: finalDesc, date, time, method, methodTo, category, goalId: linkedGoalId, debtId: linkedDebtId, catatan: catatan };
         resetFormButtons();
     } else {
-        transactions.push({ id: Date.now(), type, amount, desc, date, time, method, methodTo, category, catatan: catatan });
+        const newTxId = Date.now();
+        transactions.push({ id: newTxId, type, amount, desc, date, time, method, methodTo, category, catatan: catatan });
+        
+        // JIKA ADA BIAYA ADMIN SAAT MUTASI, SISTEM OTOMATIS BUAT 1 PENGELUARAN BARU
+        if (type === 'transfer' && admin > 0) {
+            transactions.push({ 
+                id: newTxId + 1, 
+                type: 'expense', 
+                amount: admin, 
+                desc: `Biaya Admin Mutasi: ${method} ke ${methodTo}`, 
+                date: date, 
+                time: time, 
+                method: method, 
+                category: 'biaya admin', 
+                catatan: catatan 
+            });
+        }
     }
     
     if(type === 'income') savedSources.add(desc);
@@ -599,10 +624,9 @@ function simpanTransaksi(type, idAmount, idDesc, idDate, idTime, idMethod, idKat
     renderApp();
 }
 
-// Event Listeners UPDATE UNTUK MENAMPUNG ID CATATAN
-document.getElementById('form-pemasukan').addEventListener('submit', function(e) { e.preventDefault(); simpanTransaksi('income', 'in-jumlah', 'in-sumber', 'in-tanggal', 'in-waktu', 'in-metode', null, null, 'in-catatan'); });
-document.getElementById('form-pengeluaran').addEventListener('submit', function(e) { e.preventDefault(); simpanTransaksi('expense', 'out-jumlah', 'out-detail', 'out-tanggal', 'out-waktu', 'out-metode', 'out-kategori', null, 'out-catatan'); });
-document.getElementById('form-transfer').addEventListener('submit', function(e) { e.preventDefault(); simpanTransaksi('transfer', 'tf-jumlah', 'tf-detail', 'tf-tanggal', 'tf-waktu', 'tf-metode-dari', null, 'tf-metode-ke'); });
+document.getElementById('form-pemasukan').addEventListener('submit', function(e) { e.preventDefault(); simpanTransaksi('income', 'in-jumlah', 'in-sumber', 'in-tanggal', 'in-waktu', 'in-metode', null, null, 'in-catatan', null); });
+document.getElementById('form-pengeluaran').addEventListener('submit', function(e) { e.preventDefault(); simpanTransaksi('expense', 'out-jumlah', 'out-detail', 'out-tanggal', 'out-waktu', 'out-metode', 'out-kategori', null, 'out-catatan', null); });
+document.getElementById('form-transfer').addEventListener('submit', function(e) { e.preventDefault(); simpanTransaksi('transfer', 'tf-jumlah', null, 'tf-tanggal', 'tf-waktu', 'tf-metode-dari', null, 'tf-metode-ke', 'tf-catatan', 'tf-admin'); });
 
 function hapusTransaksi(id) {
     if (confirm("Hapus transaksi ini?")) {
@@ -616,15 +640,16 @@ function renderCharts() {
     const monthlyTx = transactions.filter(tx => tx.date.startsWith(activeMonth) && tx.type !== 'transfer');
     let totalPemasukanBulanIni = monthlyTx.filter(tx => tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0);
 
-    let pengeluaranAktual = { kebutuhan: 0, keinginan: 0, tabungan: 0 };
+    let pengeluaranAktual = { kebutuhan: 0, keinginan: 0, tabungan: 0, biayaadmin: 0 };
     monthlyTx.filter(tx => tx.type === 'expense').forEach(tx => {
         const cat = (tx.category && typeof tx.category === 'string') ? tx.category.toLowerCase() : 'kebutuhan';
         if (pengeluaranAktual.hasOwnProperty(cat)) { pengeluaranAktual[cat] += tx.amount; } 
+        else if (cat === 'biaya admin') { pengeluaranAktual.biayaadmin += tx.amount; } // Tergabung khusus sementara
         else { pengeluaranAktual.kebutuhan += tx.amount; }
     });
 
     let targetIdeal = { kebutuhan: totalPemasukanBulanIni * 0.5, keinginan: totalPemasukanBulanIni * 0.3, tabungan: totalPemasukanBulanIni * 0.2 };
-    updateStatusBadge('kebutuhan', pengeluaranAktual.kebutuhan, targetIdeal.kebutuhan);
+    updateStatusBadge('kebutuhan', pengeluaranAktual.kebutuhan + pengeluaranAktual.biayaadmin, targetIdeal.kebutuhan);
     updateStatusBadge('keinginan', pengeluaranAktual.keinginan, targetIdeal.keinginan);
     updateStatusBadge('tabungan', pengeluaranAktual.tabungan, targetIdeal.tabungan);
 
@@ -650,11 +675,12 @@ function renderCharts() {
         document.getElementById('empty-realisasi-chart').style.display = 'none';
         document.getElementById('chartRealisasi').style.display = 'block';
 
-        let totalTerpakai = pengeluaranAktual.kebutuhan + pengeluaranAktual.keinginan + pengeluaranAktual.tabungan;
+        let totalTerpakai = pengeluaranAktual.kebutuhan + pengeluaranAktual.keinginan + pengeluaranAktual.tabungan + pengeluaranAktual.biayaadmin;
         let sisaPemasukan = totalPemasukanBulanIni - totalTerpakai;
         
+        // Data chart disesuaikan dengan realita Admin Fee
         let labelChart2 = ['Kebutuhan', 'Keinginan', 'Tabungan'];
-        let dataChart2 = [pengeluaranAktual.kebutuhan, pengeluaranAktual.keinginan, pengeluaranAktual.tabungan];
+        let dataChart2 = [pengeluaranAktual.kebutuhan + pengeluaranAktual.biayaadmin, pengeluaranAktual.keinginan, pengeluaranAktual.tabungan];
         let colorChart2 = ['#3498DB', '#F39C12', '#2ECC71'];
 
         if (sisaPemasukan > 0) {
